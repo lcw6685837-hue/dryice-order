@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNDOCHEM DRYICE 주문 & 생산현황</title>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+
+    <link rel="stylesheet" href="style.css?v=4">
+</head>
+<body class="p-4 lg:p-6 min-h-screen flex flex-col items-center">
+
+    <div class="w-full max-w-[1500px] flex-1 flex flex-col">
+
+        <div class="flex flex-col gap-3 mb-4">
+            <div class="flex justify-between items-center w-full relative z-20">
+                <div class="flex-1"></div>
+
+                <div class="flex items-center gap-3 bg-[#1e293b] px-6 py-2 rounded-full border border-slate-600 shadow-inner print:border-none print:bg-transparent shrink-0">
+                    <span class="text-slate-400 font-bold text-sm tracking-widest print:text-black">일 시 :</span>
+                    <input type="date" id="log-date" class="bg-transparent border-none text-xl font-black text-amber-400 outline-none cursor-pointer print:text-black text-center">
+                    <span id="log-day" class="text-xl font-black text-amber-400 ml-1 print:text-black"></span>
+                </div>
+
+                <div class="flex-1 flex justify-end gap-2 no-print shrink-0">
+                    <button onclick="toggleFullScreen()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded border border-slate-600 font-bold transition flex items-center gap-2 text-xs shadow-md"><i class="fas fa-expand"></i> 전체화면</button>
+                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded border border-slate-600 font-bold transition flex items-center gap-2 text-xs shadow-md"><i class="fas fa-print"></i> 인쇄</button>
+                    <button onclick="window.close()" class="bg-rose-900 hover:bg-rose-800 text-white px-3 py-1.5 rounded border border-rose-700 font-bold transition flex items-center gap-2 text-xs shadow-md"><i class="fas fa-times"></i> 닫기</button>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4 bg-blue-950/20 px-6 py-3 rounded-2xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] print:p-0 print:shadow-none print:bg-transparent print:border-none">
+                    <div class="bg-blue-500/20 p-2 rounded-xl border border-blue-500/50 print:border-none print:bg-transparent print:p-0">
+                        <i class="fas fa-snowflake text-[1.8rem] text-blue-400 no-print"></i>
+                        <i class="fas fa-snowflake text-[1.6rem] text-black hidden print:block"></i>
+                    </div>
+                    <h1 class="text-[2.2rem] font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 tracking-widest drop-shadow-md print:text-[1.6rem] print:text-black">DRYICE 주문 &amp; 생산현황</h1>
+                </div>
+
+                <div class="text-slate-500 font-bold text-sm tracking-widest print:text-black">선도화학(주)</div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border-[3px] border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.2)] print:border-black print:border print:shadow-none">
+            <table class="dg-table">
+                <colgroup>
+                    <col class="col-client">
+                    <col class="col-type">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-qty">
+                    <col class="col-total">
+                    <col class="col-dest">
+                    <col class="col-remark">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th rowspan="2">거래처명</th>
+                        <th rowspan="2">구분</th>
+                        <th colspan="2">웰빗</th>
+                        <th colspan="3">B 타입</th>
+                        <th rowspan="2">400g<br>(19.2kg)</th>
+                        <th rowspan="2">500g<br>(21kg)</th>
+                        <th rowspan="2">600g<br>(21.6kg)</th>
+                        <th colspan="3">30kg</th>
+                        <th rowspan="2">20kg<br>(AP)</th>
+                        <th colspan="1">20kg</th>
+                        <th rowspan="2">계</th>
+                        <th rowspan="2">도착지</th>
+                        <th rowspan="2" class="remark-header">비 고</th>
+                    </tr>
+                    <tr class="sub-head">
+                        <th>100kg<br>(16mm)</th>
+                        <th>200kg<br>(3mm)</th>
+                        <th>150kg</th>
+                        <th>200kg</th>
+                        <th>250kg</th>
+                        <th>블럭</th>
+                        <th>조각</th>
+                        <th>#2</th>
+                        <th>3/16펠렛</th>
+                    </tr>
+                </thead>
+                <tbody id="dg-body"></tbody>
+                <tfoot>
+                    <tr id="dg-total-row">
+                        <td colspan="2" class="total-label">합 계</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="mt-6 rounded-xl border-[2px] border-slate-600 overflow-hidden print:border-black">
+            <div class="bg-slate-800/80 text-center py-2 font-black tracking-widest text-lg print:bg-[#e2e8f0] print:text-black">익일 예상 물량</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-0 items-start">
+                <table class="fc-table w-full border-collapse">
+                    <tbody id="fc-left-body"></tbody>
+                </table>
+                <table class="fc-table w-full border-collapse">
+                    <tbody id="fc-right-body"></tbody>
+                </table>
+            </div>
+            <div class="fc-note-box bg-amber-300/90 text-black font-bold text-sm px-4 py-2 text-right print:text-black">
+                파렛트 상차시 작업 후 랩핑, 살포 부탁드립니다
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=3"></script>
+</body>
+</html>
