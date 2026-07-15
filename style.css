@@ -24,10 +24,19 @@ textarea { resize: none; }
 .dg-table tbody td.client-cell { color: #f1f5f9; font-weight: 700; font-size: 0.82rem; }
 .dg-table tbody td.rowtype-cell { color: #94a3b8; font-weight: 600; font-size: 0.7rem; white-space: nowrap; }
 .dg-table tbody td.dest-cell { color: #cbd5e1; font-weight: 700; font-size: 1.56rem; }
-.dg-table tbody tr.row-order { background-color: rgba(56, 189, 248, 0.08); }
-.dg-table tbody tr.row-prod { background-color: transparent; }
+
+/* 🔵 주문수량 행: 블루 테마 (수요/계획) */
+.dg-table tbody tr.row-order { background-color: rgba(56, 189, 248, 0.10); }
+.dg-table tbody tr.row-order .qty-cell { color: #38bdf8; font-weight: 700; }
+
+/* 🟢 생산량 행: 에메랄드 그린 테마 (실행/실적) */
+.dg-table tbody tr.row-prod { background-color: rgba(16, 185, 129, 0.08); }
+.dg-table tbody tr.row-prod .qty-cell { color: #34d399; font-weight: 700; }
+
+/* 🟠 미생산 행 */
 .dg-table tbody tr.row-unprod { background-color: rgba(251, 146, 60, 0.08); }
 .dg-table tbody td.unprod-cell { font-weight: 700; color: #fdba74; font-size: 1.05rem; }
+
 .dg-table tbody td.row-total-cell { font-weight: 800; color: #67e8f9; background-color: rgba(6, 182, 212, 0.08); font-size: 1.05rem; }
 .dg-table tfoot td { background-color: rgba(16, 185, 129, 0.18); color: #6ee7b7; font-weight: 800; font-size: 1.05rem; }
 .dg-table tfoot td.total-label { color: #d1fae5; }
@@ -41,8 +50,8 @@ textarea { resize: none; }
 .dg-table tbody tr.client-odd td.remark-cell { background-color: rgba(71, 85, 105, 0.35); }
 .dg-table tbody tr.client-start td { border-top: 3px solid #3b82f6; }
 
-.qty-cell { width: 100%; background: transparent; border: none; outline: none; color: #e2e8f0; text-align: center; font-size: 1.05rem; font-weight: 600; padding: 2px; }
-.qty-cell:focus { background-color: rgba(59, 130, 246, 0.15); }
+.qty-cell { width: 100%; background: transparent; border: none; outline: none; text-align: center; font-size: 1.05rem; font-weight: 600; padding: 2px; }
+.qty-cell:focus { background-color: rgba(59, 130, 246, 0.2); }
 .remark-cell textarea { width: 100%; height: 100%; min-height: 70px; background: transparent; border: none; outline: none; color: #e2e8f0; font-size: 1.3rem; line-height: 1.4; text-align: left; padding: 4px 8px; }
 
 .fc-input { background: transparent; border: none; outline: none; color: #fde68a; font-weight: 700; text-align: left; width: 100%; font-size: 1.3rem; padding: 2px 6px; }
@@ -71,7 +80,7 @@ textarea { resize: none; }
     .dg-table tbody td.client-cell { background-color: #f8fafc !important; }
     .dg-table tbody td.dest-cell { font-size: 0.85rem !important; }
     .dg-table tbody tr.row-order { background-color: #dbeafe !important; }
-    .dg-table tbody tr.row-prod { background-color: #ffffff !important; }
+    .dg-table tbody tr.row-prod { background-color: #f0fdf4 !important; }
     .dg-table tbody tr.row-unprod { background-color: #ffedd5 !important; }
     .dg-table tbody td.row-total-cell { background-color: #cffafe !important; }
     .dg-table tfoot td { background-color: #bbf7d0 !important; }
@@ -82,6 +91,8 @@ textarea { resize: none; }
     .dg-table tbody tr.client-start td { border-top: 2px solid #000000 !important; }
 
     .qty-cell { color: #000000 !important; font-size: 0.5rem !important; padding: 0 1px !important; }
+    .dg-table tbody tr.row-order .qty-cell,
+    .dg-table tbody tr.row-prod .qty-cell { color: #000000 !important; } /* 인쇄 시 가독성을 위해 검정 통일 */
     .dg-table tbody td.unprod-cell, .dg-table tbody td.row-total-cell, .dg-table tfoot td { font-size: 0.5rem !important; }
     .fc-input { color: #000000 !important; font-size: 0.85rem !important; }
     .remark-cell textarea { font-size: 0.95rem !important; padding: 2px 4px !important; }

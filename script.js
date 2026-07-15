@@ -252,6 +252,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
     recalcAll();
 
+    // ── ⌨️ 스마트 공간 내비게이션 (Smart Spatial Navigation) 구현 ──
+    function getActiveInputs() {
+        return Array.from(document.querySelectorAll('input.qty-input, input.fc-input, textarea.sync-item, .remark-cell textarea'))
+            .filter(el => !el.disabled && !el.readOnly && el.offsetParent !== null);
+    }
+
+    function findSpatialTarget(currentEl, direction) {
+        const inputs = getActiveInputs();
+        const curRect = currentEl.getBoundingClientRect();
+        const curX = curRect.left + curRect.width / 2;
+        const curY = curRect.top + curRect.height / 2;
+
+        let candidates = [];
+
+        inputs.forEach(el => {
+            if (el === currentEl) return;
+            const rect = el.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+
+            if (direction === 'up' && y < curY - 5) {
+                candidates.push({ el, x, y });
+            } else if (direction === 'down' && y > curY + 5) {
+                candidates.push({ el, x, y });
+            }
+        });
+
+        if (candidates.length === 0) return null;
+
+        // 수직 거리가 우선이며, 수직 거리가 유사할 경우 수평 거리가 가까운 항목 선택
+        candidates.sort((a, b) => {
+            const dyA = Math.abs(a.y - curY);
+            const dyB = Math.abs(b.y - curY);
+
+            if (Math.abs(dyA - dyB) > 15) {
+                return dyA - dyB;
+            }
+            return Math.abs(a.x - curX) - Math.abs(b.x - curX);
+        });
+
+        return candidates[0].el;
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const target = e.target;
+        if (!target.matches('input.qty-input, input.fc-input, textarea')) return;
+
+        const inputs = getActiveInputs();
+        const index = inputs.indexOf(target);
+        if (index === -1) return;
+
+        let nextTarget = null;
+
+        if (e.key === 'ArrowLeft') {
+            if (index > 0) {
+                nextTarget = inputs[index - 1];
+            }
+            e.preventDefault();
+        } else if (e.key === 'ArrowRight' || e.key === 'Enter') {
+            if (index < inputs.length - 1) {
+                nextTarget = inputs[index + 1];
+            }
+            e.preventDefault(); // 엔터 입력 시 폼 전송 또는 기본 줄바꿈 차단
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            nextTarget = findSpatialTarget(target, 'up');
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            nextTarget = findSpatialTarget(target, 'down');
+        }
+
+        if (nextTarget) {
+            nextTarget.focus();
+            if (typeof nextTarget.select === 'function') {
+                nextTarget.select(); // 포커스 이동 시 기존 텍스트 전체 선택
+            }
+        }
+    });
+
     // 🛡️ 2. Firebase 실시간 동기화 커넥션 코어
     const syncItems = document.querySelectorAll('.sync-item');
     let currentRef = null;
