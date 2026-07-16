@@ -95,6 +95,7 @@ function formatCommaNum(num) {
   return num.toLocaleString("ko-KR");
 }
 
+// ── 🏰 웹 로딩 성벽 시작 (이 내부에서 선전된 도구들은 안전하게 상호 유기 작용합니다) ──
 document.addEventListener("DOMContentLoaded", () => {
   const dateInput = document.getElementById("log-date");
   const dayDisplay = document.getElementById("log-day");
@@ -424,7 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 🛡️ 2. Firebase 실시간 동기화 커넥션 코어
+  // 🛡️ 2. Firebase 실시간 동기화 커넥션 코어 (완벽한 유효 범위 안에서 작동 보장)
   const syncItems = document.querySelectorAll(".sync-item");
   let currentRef = null;
 
@@ -464,12 +465,14 @@ document.addEventListener("DOMContentLoaded", () => {
       loadLogData(dateInput.value);
       updateDayDisplay(dateInput.value);
     } else {
-      window.location.replace("index.html");
+      // index.html 무한 대피 차단 -> login.html로 우회
+      window.location.replace("login.html");
     }
   });
 });
+// ── 🏰 웹 로딩 성벽 끝 ──
 
-// 자정 경과 시 자동 세션 새로고침 안전장치
+// 자정 경과 시 자동 세션 새로고침 안전장치 (성벽 바깥 독립 실행부)
 function scheduleMidnightRefresh() {
   const now = new Date();
   const tomorrow = new Date(

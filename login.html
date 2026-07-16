@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNDOCHEM - 로그인</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Firebase SDK (대시보드와 동일 버전) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+</head>
+<body class="bg-[#0b1120] min-h-screen flex items-center justify-center p-4 font-['Pretendard']">
+
+    <div class="w-full max-w-md bg-slate-900/80 border border-blue-500/30 rounded-2xl p-8 shadow-[0_0_30px_rgba(59,130,246,0.15)] backdrop-blur-md">
+        
+        <!-- 상단 브랜드 로고 영역 -->
+        <div class="flex flex-col items-center mb-8">
+            <div class="bg-blue-500/20 p-4 rounded-full border border-blue-500/50 mb-3 shadow-[0_0_15px_rgba(59,130,246,0.3)] animate-pulse">
+                <i class="fas fa-snowflake text-[2.5rem] text-blue-400"></i>
+            </div>
+            <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 tracking-wider">DRYICE 관제 시스템</h1>
+            <p class="text-xs font-bold text-slate-500 tracking-widest mt-1">선도화학(주)</p>
+        </div>
+
+        <!-- 로그인 입력 폼 -->
+        <form id="login-form" class="space-y-5">
+            <div>
+                <label class="block text-slate-400 text-xs font-bold tracking-wider mb-2">이메일 주소</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" id="email" required
+                           class="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                           placeholder="example@sundochem.co.kr">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-slate-400 text-xs font-bold tracking-wider mb-2">비밀번호</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password" id="password" required
+                           class="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                           placeholder="••••••••">
+                </div>
+            </div>
+
+            <button type="submit" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black py-3 rounded-xl shadow-lg transition active:scale-[0.98] mt-2 tracking-widest">
+                안전하게 로그인
+            </button>
+        </form>
+
+        <!-- 푸터 안내 및 에러 메시지 라벨 -->
+        <div id="error-message" class="hidden text-rose-400 text-xs text-center font-bold mt-4 bg-rose-500/10 border border-rose-500/20 py-2 rounded-lg"></div>
+        
+        <div class="text-center text-[11px] text-slate-600 font-bold mt-8">
+            본 시스템은 선도화학(주) 전용 시스템입니다. 허가되지 않은 접근은 제한됩니다.
+        </div>
+    </div>
+
+    <script>
+        // 🔒 Firebase 설정 초기화 (대시보드 script.js에서 설정했던 값과 완전히 동일하게 연동합니다.)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_JNWO5Ke5ZVJDnwP06QW9WsZXNZFv0bc",
+            authDomain: "sundochem-dashboard.firebaseapp.com",
+            databaseURL: "https://sundochem-dashboard-default-rtdb.firebaseio.com",
+            projectId: "sundochem-dashboard",
+            storageBucket: "sundochem-dashboard.firebasestorage.app",
+            messagingSenderId: "360796635566",
+            appId: "1:360796635566:web:d3bf85eb5e5e1574b5483f"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+
+        // 로그인 처리 이벤트 리스너
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorBox = document.getElementById('error-message');
+
+            errorBox.classList.add('hidden');
+            errorBox.textContent = '';
+
+            // Firebase Authentication 실제 로그인 트리거
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // 로그인 성공 시 메인 대시보드로 통과!
+                    window.location.replace("index.html");
+                })
+                .catch((error) => {
+                    errorBox.classList.remove('hidden');
+                    if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                        errorBox.textContent = '이메일 또는 비밀번호가 일치하지 않습니다.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorBox.textContent = '올바르지 않은 이메일 형식입니다.';
+                    } else {
+                        errorBox.textContent = '로그인 실패: ' + error.message;
+                    }
+                });
+        });
+
+        // 이미 로그인 되어있는 사용자라면 바로 대시보드로 자동 연결
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                window.location.replace("index.html");
+            }
+        });
+    </script>
+</body>
+</html>
