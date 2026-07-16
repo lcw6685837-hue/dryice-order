@@ -1,173 +1,197 @@
 function toggleFullScreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.log(`전체화면 에러: ${err.message}`);
-        });
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch((err) => {
+      console.log(`전체화면 에러: ${err.message}`);
+    });
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
     }
+  }
 }
 
 // 🛡️ 1. Firebase 설정 초기화
 const firebaseConfig = {
-    apiKey: "AIzaSyA_JNWO5Ke5ZVJDnwP06QW9WsZXNZFv0bc",
-    authDomain: "sundochem-dashboard.firebaseapp.com",
-    databaseURL: "https://sundochem-dashboard-default-rtdb.firebaseio.com",
-    projectId: "sundochem-dashboard",
-    storageBucket: "sundochem-dashboard.firebasestorage.app",
-    messagingSenderId: "360796635566",
-    appId: "1:360796635566:web:d3bf85eb5e5e1574b5483f"
+  apiKey: "AIzaSyA_JNWO5Ke5ZVJDnwP06QW9WsZXNZFv0bc",
+  authDomain: "sundochem-dashboard.firebaseapp.com",
+  databaseURL: "https://sundochem-dashboard-default-rtdb.firebaseio.com",
+  projectId: "sundochem-dashboard",
+  storageBucket: "sundochem-dashboard.firebasestorage.app",
+  messagingSenderId: "360796635566",
+  appId: "1:360796635566:web:d3bf85eb5e5e1574b5483f",
 };
 
 if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database();
 
 // 품목 정의 (PDF: DRYICE 주문 & 생산현황 열 구성)
 const PRODUCTS = [
-    { key: 'p100', label: '100kg' },
-    { key: 'p200', label: '200kg' },
-    { key: 'b150', label: '150kg' },
-    { key: 'b200', label: '200kg' },
-    { key: 'b250', label: '250kg' },
-    { key: 'g400', label: '400g' },
-    { key: 'g500', label: '500g' },
-    { key: 'g600', label: '600g' },
-    { key: 'k30a', label: '블럭' },
-    { key: 'k30b', label: '조각' },
-    { key: 'k30c', label: '#2' },
-    { key: 'k20ap', label: '20kg(AP)' },
-    { key: 'k20p', label: '3/16펠렛' }
+  { key: "p100", label: "100kg" },
+  { key: "p200", label: "200kg" },
+  { key: "b150", label: "150kg" },
+  { key: "b200", label: "200kg" },
+  { key: "b250", label: "250kg" },
+  { key: "g400", label: "400g" },
+  { key: "g500", label: "500g" },
+  { key: "g600", label: "600g" },
+  { key: "k30a", label: "블럭" },
+  { key: "k30b", label: "조각" },
+  { key: "k30c", label: "#2" },
+  { key: "k20ap", label: "20kg(AP)" },
+  { key: "k20p", label: "3/16펠렛" },
 ];
 
 // 거래처 정의 (고정 14곳, PDF 기준)
 const CLIENTS = [
-    { name: '화일공항', dest: '공항' },
-    { name: '화일경보', dest: '공항' },
-    { name: '화일상사(A)', dest: '용인' },
-    { name: '화일상사(B)', dest: '용인' },
-    { name: '영재상사', dest: '서울' },
-    { name: '한국콜드체인(A)', dest: '이천' },
-    { name: '한국콜드체인(B)', dest: '이천' },
-    { name: '경기남부(A)', dest: '평택' },
-    { name: '경기남부(B)', dest: '평택' },
-    { name: '용인드라이', dest: '서산' },
-    { name: '엠엔엠', dest: '서산' },
-    { name: '프레임', dest: '서울' },
-    { name: '세종상사', dest: '이천' },
-    { name: '대만(BUSH)', dest: '대만' }
+  { name: "화일공항", dest: "공항" },
+  { name: "화일경보", dest: "공항" },
+  { name: "화일상사(A)", dest: "용인" },
+  { name: "화일상사(B)", dest: "용인" },
+  { name: "영재상사", dest: "서울" },
+  { name: "한국콜드체인(A)", dest: "이천" },
+  { name: "한국콜드체인(B)", dest: "이천" },
+  { name: "경기남부(A)", dest: "평택" },
+  { name: "경기남부(B)", dest: "평택" },
+  { name: "용인드라이", dest: "서산" },
+  { name: "엠엔엠", dest: "서산" },
+  { name: "프레임", dest: "서울" },
+  { name: "세종상사", dest: "이천" },
+  { name: "대만(BUSH)", dest: "대만" },
 ];
 
 const ROW_TYPES = [
-    { key: 'order', label: '주문수량', cls: 'row-order' },
-    { key: 'prod', label: '생산량', cls: 'row-prod' },
-    { key: 'unprod', label: '미생산', cls: 'row-unprod' }
+  { key: "order", label: "주문수량", cls: "row-order" },
+  { key: "prod", label: "생산량", cls: "row-prod" },
+  { key: "unprod", label: "미생산", cls: "row-unprod" },
 ];
 
 // 익일 예상 물량 - 좌/우 거래처 목록
 const FC_LEFT = [
-    { id: 'fc_export', label: '수출', special: true },
-    { id: 'fc_airport', label: '공항' },
-    { id: 'fc_gyeongbo', label: '경보' },
-    { id: 'fc_sejong', label: '세종상사' },
-    { id: 'fc_kcc_a', label: '한국콜드체인(A)' },
-    { id: 'fc_kcc_b', label: '한국콜드체인(B)' },
-    { id: 'fc_gnb', label: '경기남부' },
-    { id: 'fc_mnm', label: '엠엔엠' },
-    { id: 'fc_hwail', label: '화일상사' }
+  { id: "fc_export", label: "수출", special: true },
+  { id: "fc_airport", label: "공항" },
+  { id: "fc_gyeongbo", label: "경보" },
+  { id: "fc_sejong", label: "세종상사" },
+  { id: "fc_kcc_a", label: "한국콜드체인(A)" },
+  { id: "fc_kcc_b", label: "한국콜드체인(B)" },
+  { id: "fc_gnb", label: "경기남부" },
+  { id: "fc_mnm", label: "엠엔엠" },
+  { id: "fc_hwail", label: "화일상사" },
 ];
 const FC_RIGHT = [
-    { id: 'fc_yongin', label: '용인드라이' },
-    { id: 'fc_frame', label: '프레임' },
-    { id: 'fc_file', label: '화일' },
-    { id: 'fc_youngjae', label: '영재' }
+  { id: "fc_yongin", label: "용인드라이" },
+  { id: "fc_frame", label: "프레임" },
+  { id: "fc_file", label: "화일" },
+  { id: "fc_youngjae", label: "영재" },
 ];
 
 function parseCommaNum(str) {
-    const n = parseInt(String(str).replace(/,/g, ''), 10);
-    return isNaN(n) ? 0 : n;
+  const n = parseInt(String(str).replace(/,/g, ""), 10);
+  return isNaN(n) ? 0 : n;
 }
 function formatCommaNum(num) {
-    if (!num) return '';
-    return num.toLocaleString('ko-KR');
+  if (!num) return "";
+  return num.toLocaleString("ko-KR");
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const dateInput = document.getElementById('log-date');
-    const dayDisplay = document.getElementById('log-day');
-    const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+document.addEventListener("DOMContentLoaded", () => {
+  const dateInput = document.getElementById("log-date");
+  const dayDisplay = document.getElementById("log-day");
+  const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 
-    function updateDayDisplay(dateStr) {
-        const dateObj = new Date(dateStr);
-        if (!isNaN(dateObj)) {
-            dayDisplay.textContent = daysOfWeek[dateObj.getDay()] + '요일';
-        }
+  function updateDayDisplay(dateStr) {
+    const dateObj = new Date(dateStr);
+    if (!isNaN(dateObj)) {
+      dayDisplay.textContent = daysOfWeek[dateObj.getDay()] + "요일";
     }
+  }
 
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    dateInput.value = `${yyyy}-${mm}-${dd}`;
-    updateDayDisplay(dateInput.value);
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  dateInput.value = `${yyyy}-${mm}-${dd}`;
+  updateDayDisplay(dateInput.value);
 
-    // ── 메인 그리드(거래처 x 품목) 동적 생성 ──
-    const dgBody = document.getElementById('dg-body');
+  // ── 📅 1. 원클릭 날짜 이동 기능 제어부 ──
+  const prevBtn = document.getElementById("btn-prev-date");
+  const nextBtn = document.getElementById("btn-next-date");
 
-    CLIENTS.forEach((client, ci) => {
-        ROW_TYPES.forEach((rt, ri) => {
-            const tr = document.createElement('tr');
-            tr.className = rt.cls + (ci % 2 === 0 ? ' client-even' : ' client-odd') + (ri === 0 ? ' client-start' : '');
+  function shiftDate(days) {
+    const currentDate = new Date(dateInput.value);
+    if (!isNaN(currentDate)) {
+      currentDate.setDate(currentDate.getDate() + days);
+      const yyyy = currentDate.getFullYear();
+      const mm = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const dd = String(currentDate.getDate()).padStart(2, "0");
+      dateInput.value = `${yyyy}-${mm}-${dd}`;
 
-            let html = '';
-            if (ri === 0) {
-                html += `<td class="client-cell" rowspan="3">${client.name}</td>`;
-            }
-            html += `<td class="rowtype-cell">${rt.label}</td>`;
+      // change 이벤트를 강제로 발생시켜 Firebase 데이터 리로딩 및 요일 UI 동기화 수행
+      dateInput.dispatchEvent(new Event("change"));
+    }
+  }
 
-            PRODUCTS.forEach(p => {
-                if (rt.key === 'unprod') {
-                    html += `<td id="c${ci}_${p.key}_unprod" class="unprod-cell"></td>`;
-                } else {
-                    html += `<td><input type="text" inputmode="numeric" class="qty-cell sync-item qty-input" id="c${ci}_${p.key}_${rt.key}" placeholder=""></td>`;
-                }
-            });
+  if (prevBtn) prevBtn.addEventListener("click", () => shiftDate(-1));
+  if (nextBtn) nextBtn.addEventListener("click", () => shiftDate(1));
 
-            html += `<td id="c${ci}_row_${rt.key}_total" class="row-total-cell"></td>`;
+  // ── 메인 그리드(거래처 x 품목) 동적 생성 ──
+  const dgBody = document.getElementById("dg-body");
 
-            if (ri === 0) {
-                html += `<td class="dest-cell" rowspan="3">${client.dest}</td>`;
-                html += `<td class="remark-cell" rowspan="3"><textarea id="c${ci}_remark" class="sync-item" placeholder="비고"></textarea></td>`;
-            }
+  CLIENTS.forEach((client, ci) => {
+    ROW_TYPES.forEach((rt, ri) => {
+      const tr = document.createElement("tr");
+      tr.className =
+        rt.cls +
+        (ci % 2 === 0 ? " client-even" : " client-odd") +
+        (ri === 0 ? " client-start" : "");
 
-            tr.innerHTML = html;
-            dgBody.appendChild(tr);
-        });
+      let html = "";
+      if (ri === 0) {
+        html += `<td class="client-cell" rowspan="3">${client.name}</td>`;
+      }
+      html += `<td class="rowtype-cell">${rt.label}</td>`;
+
+      PRODUCTS.forEach((p) => {
+        if (rt.key === "unprod") {
+          html += `<td id="c${ci}_${p.key}_unprod" class="unprod-cell"></td>`;
+        } else {
+          html += `<td><input type="text" inputmode="numeric" class="qty-cell sync-item qty-input" id="c${ci}_${p.key}_${rt.key}" placeholder=""></td>`;
+        }
+      });
+
+      html += `<td id="c${ci}_row_${rt.key}_total" class="row-total-cell"></td>`;
+
+      if (ri === 0) {
+        html += `<td class="dest-cell" rowspan="3">${client.dest}</td>`;
+        html += `<td class="remark-cell" rowspan="3"><textarea id="c${ci}_remark" class="sync-item" placeholder="비고"></textarea></td>`;
+      }
+
+      tr.innerHTML = html;
+      dgBody.appendChild(tr);
     });
+  });
 
-    // ── 합계 행(tfoot) 셀 생성 ──
-    const totalRow = document.getElementById('dg-total-row');
-    PRODUCTS.forEach(p => {
-        const td = document.createElement('td');
-        td.id = `col_${p.key}_total`;
-        totalRow.appendChild(td);
-    });
-    const grandTd = document.createElement('td');
-    grandTd.id = 'grand_total';
-    totalRow.appendChild(grandTd);
-    const emptyTd = document.createElement('td');
-    emptyTd.colSpan = 2;
-    totalRow.appendChild(emptyTd);
+  // ── 합계 행(tfoot) 셀 생성 ──
+  const totalRow = document.getElementById("dg-total-row");
+  PRODUCTS.forEach((p) => {
+    const td = document.createElement("td");
+    td.id = `col_${p.key}_total`;
+    totalRow.appendChild(td);
+  });
+  const grandTd = document.createElement("td");
+  grandTd.id = "grand_total";
+  totalRow.appendChild(grandTd);
+  const emptyTd = document.createElement("td");
+  emptyTd.colSpan = 2;
+  totalRow.appendChild(emptyTd);
 
-    // ── 익일 예상 물량 표 생성 ──
-    const fcLeftBody = document.getElementById('fc-left-body');
-    FC_LEFT.forEach(row => {
-        const tr = document.createElement('tr');
-        if (row.special) {
-            tr.innerHTML = `
+  // ── 익일 예상 물량 표 생성 ──
+  const fcLeftBody = document.getElementById("fc-left-body");
+  FC_LEFT.forEach((row) => {
+    const tr = document.createElement("tr");
+    if (row.special) {
+      tr.innerHTML = `
                 <td class="font-bold w-28 align-top py-2" rowspan="1">${row.label}</td>
                 <td class="text-left text-xs leading-6 py-1">
                     <div class="flex items-center gap-2">
@@ -180,204 +204,285 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="text-slate-400 print:text-black">컨테이너 작업시간 최대 2시간 / 사진 촬영요망</div>
                 </td>`;
-        } else {
-            tr.innerHTML = `
+    } else {
+      tr.innerHTML = `
                 <td class="font-bold w-28">${row.label}</td>
                 <td><input type="text" id="${row.id}" class="fc-input sync-item"></td>`;
-        }
-        fcLeftBody.appendChild(tr);
-    });
+    }
+    fcLeftBody.appendChild(tr);
+  });
 
-    const fcRightBody = document.getElementById('fc-right-body');
-    FC_RIGHT.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+  const fcRightBody = document.getElementById("fc-right-body");
+  FC_RIGHT.forEach((row) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
             <td class="font-bold w-28">${row.label}</td>
             <td><input type="text" id="${row.id}" class="fc-input sync-item"></td>`;
-        fcRightBody.appendChild(tr);
+    fcRightBody.appendChild(tr);
+  });
+
+  // ── ✍️ 2. '영재' 바로 하단에 수기 입력 특이사항 패널 배치 (높이 자동 확장 구조 적용) ──
+  const remarkTr = document.createElement("tr");
+  remarkTr.innerHTML = `
+        <td colspan="2" class="p-1 align-top border-t border-slate-700/50">
+            <textarea id="fc_right_remark" class="sync-item w-full bg-transparent border-none outline-none text-[#fde68a] font-bold text-[1.1rem] p-3 resize-none overflow-hidden" placeholder="" style="min-height: 250px; height: auto;"></textarea>
+        </td>`;
+  fcRightBody.appendChild(remarkTr);
+
+  // 🎯 수기 입력란의 텍스트 양에 맞춰 세로 높이를 유연하게 자동 조절하는 엔진
+  function adjustRemarkHeight() {
+    const textarea = document.getElementById("fc_right_remark");
+    if (textarea) {
+      textarea.style.height = "auto";
+      // 스크롤바 생성 없이 컨텍스트 전체가 완전히 다 보이도록 높이 값 보정
+      textarea.style.height = textarea.scrollHeight + "px";
+    }
+  }
+
+  const rTextarea = document.getElementById("fc_right_remark");
+  if (rTextarea) {
+    rTextarea.addEventListener("input", adjustRemarkHeight);
+  }
+
+  // ── 자동 계산 엔진 ──
+  function recalcAll() {
+    let grandOrderTotal = 0;
+    const colOrderTotals = {};
+    PRODUCTS.forEach((p) => {
+      colOrderTotals[p.key] = 0;
     });
 
-    // ── 자동 계산 엔진 ──
-    function recalcAll() {
-        let grandOrderTotal = 0;
-        const colOrderTotals = {};
-        PRODUCTS.forEach(p => { colOrderTotals[p.key] = 0; });
+    CLIENTS.forEach((client, ci) => {
+      let rowOrderSum = 0,
+        rowProdSum = 0;
 
-        CLIENTS.forEach((client, ci) => {
-            let rowOrderSum = 0, rowProdSum = 0;
+      PRODUCTS.forEach((p) => {
+        const oInput = document.getElementById(`c${ci}_${p.key}_order`);
+        const pInput = document.getElementById(`c${ci}_${p.key}_prod`);
+        const uCell = document.getElementById(`c${ci}_${p.key}_unprod`);
 
-            PRODUCTS.forEach(p => {
-                const oInput = document.getElementById(`c${ci}_${p.key}_order`);
-                const pInput = document.getElementById(`c${ci}_${p.key}_prod`);
-                const uCell = document.getElementById(`c${ci}_${p.key}_unprod`);
+        const oRaw = oInput.value.trim();
+        const pRaw = pInput.value.trim();
+        const oVal = parseCommaNum(oRaw);
+        const pVal = parseCommaNum(pRaw);
 
-                const oRaw = oInput.value.trim();
-                const pRaw = pInput.value.trim();
-                const oVal = parseCommaNum(oRaw);
-                const pVal = parseCommaNum(pRaw);
+        rowOrderSum += oVal;
+        rowProdSum += pVal;
+        colOrderTotals[p.key] += oVal;
 
-                rowOrderSum += oVal;
-                rowProdSum += pVal;
-                colOrderTotals[p.key] += oVal;
-
-                if (oRaw === '' && pRaw === '') {
-                    uCell.textContent = '';
-                } else {
-                    uCell.textContent = (oVal - pVal).toLocaleString('ko-KR');
-                }
-            });
-
-            grandOrderTotal += rowOrderSum;
-            const rowUnprodSum = rowOrderSum - rowProdSum;
-
-            document.getElementById(`c${ci}_row_order_total`).textContent = formatCommaNum(rowOrderSum);
-            document.getElementById(`c${ci}_row_prod_total`).textContent = formatCommaNum(rowProdSum);
-            document.getElementById(`c${ci}_row_unprod_total`).textContent = formatCommaNum(rowUnprodSum);
-        });
-
-        PRODUCTS.forEach(p => {
-            document.getElementById(`col_${p.key}_total`).textContent = formatCommaNum(colOrderTotals[p.key]);
-        });
-        document.getElementById('grand_total').textContent = grandOrderTotal.toLocaleString('ko-KR');
-    }
-
-    // 수량 입력 필터링 (숫자 + 콤마 포맷)
-    document.querySelectorAll('.qty-input').forEach(input => {
-        input.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/[^0-9]/g, '');
-            e.target.value = val === '' ? '' : parseInt(val, 10).toLocaleString('ko-KR');
-            recalcAll();
-        });
-    });
-
-    recalcAll();
-
-    // ── ⌨️ 스마트 공간 내비게이션 (Smart Spatial Navigation) 구현 ──
-    function getActiveInputs() {
-        return Array.from(document.querySelectorAll('input.qty-input, input.fc-input, textarea.sync-item, .remark-cell textarea'))
-            .filter(el => !el.disabled && !el.readOnly && el.offsetParent !== null);
-    }
-
-    function findSpatialTarget(currentEl, direction) {
-        const inputs = getActiveInputs();
-        const curRect = currentEl.getBoundingClientRect();
-        const curX = curRect.left + curRect.width / 2;
-        const curY = curRect.top + curRect.height / 2;
-
-        let candidates = [];
-
-        inputs.forEach(el => {
-            if (el === currentEl) return;
-            const rect = el.getBoundingClientRect();
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
-
-            if (direction === 'up' && y < curY - 5) {
-                candidates.push({ el, x, y });
-            } else if (direction === 'down' && y > curY + 5) {
-                candidates.push({ el, x, y });
-            }
-        });
-
-        if (candidates.length === 0) return null;
-
-        // 수직 거리가 우선이며, 수직 거리가 유사할 경우 수평 거리가 가까운 항목 선택
-        candidates.sort((a, b) => {
-            const dyA = Math.abs(a.y - curY);
-            const dyB = Math.abs(b.y - curY);
-
-            if (Math.abs(dyA - dyB) > 15) {
-                return dyA - dyB;
-            }
-            return Math.abs(a.x - curX) - Math.abs(b.x - curX);
-        });
-
-        return candidates[0].el;
-    }
-
-    document.addEventListener('keydown', (e) => {
-        const target = e.target;
-        if (!target.matches('input.qty-input, input.fc-input, textarea')) return;
-
-        const inputs = getActiveInputs();
-        const index = inputs.indexOf(target);
-        if (index === -1) return;
-
-        let nextTarget = null;
-
-        if (e.key === 'ArrowLeft') {
-            if (index > 0) {
-                nextTarget = inputs[index - 1];
-            }
-            e.preventDefault();
-        } else if (e.key === 'ArrowRight' || e.key === 'Enter') {
-            if (index < inputs.length - 1) {
-                nextTarget = inputs[index + 1];
-            }
-            e.preventDefault(); // 엔터 입력 시 폼 전송 또는 기본 줄바꿈 차단
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            nextTarget = findSpatialTarget(target, 'up');
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            nextTarget = findSpatialTarget(target, 'down');
-        }
-
-        if (nextTarget) {
-            nextTarget.focus();
-            if (typeof nextTarget.select === 'function') {
-                nextTarget.select(); // 포커스 이동 시 기존 텍스트 전체 선택
-            }
-        }
-    });
-
-    // 🛡️ 2. Firebase 실시간 동기화 커넥션 코어
-    const syncItems = document.querySelectorAll('.sync-item');
-    let currentRef = null;
-
-    function loadLogData(dateStr) {
-        if (currentRef) currentRef.off();
-        currentRef = db.ref('dryice_status/' + dateStr);
-
-        currentRef.on('value', snapshot => {
-            const data = snapshot.val() || {};
-            syncItems.forEach(item => {
-                if (document.activeElement !== item) {
-                    item.value = data[item.id] || '';
-                }
-            });
-            recalcAll();
-        });
-    }
-
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            syncItems.forEach(item => {
-                item.addEventListener('input', e => {
-                    if (currentRef) {
-                        currentRef.child(e.target.id).set(e.target.value);
-                    }
-                });
-            });
-
-            dateInput.addEventListener('change', e => {
-                loadLogData(e.target.value);
-                updateDayDisplay(e.target.value);
-            });
-
-            loadLogData(dateInput.value);
-            updateDayDisplay(dateInput.value);
+        if (oRaw === "" && pRaw === "") {
+          uCell.textContent = "";
         } else {
-            window.location.replace("index.html");
+          uCell.textContent = (oVal - pVal).toLocaleString("ko-KR");
         }
+      });
+
+      grandOrderTotal += rowOrderSum;
+      const rowUnprodSum = rowOrderSum - rowProdSum;
+
+      document.getElementById(`c${ci}_row_order_total`).textContent =
+        formatCommaNum(rowOrderSum);
+      document.getElementById(`c${ci}_row_prod_total`).textContent =
+        formatCommaNum(rowProdSum);
+      document.getElementById(`c${ci}_row_unprod_total`).textContent =
+        formatCommaNum(rowUnprodSum);
     });
+
+    PRODUCTS.forEach((p) => {
+      document.getElementById(`col_${p.key}_total`).textContent =
+        formatCommaNum(colOrderTotals[p.key]);
+    });
+    document.getElementById("grand_total").textContent =
+      grandOrderTotal.toLocaleString("ko-KR");
+  }
+
+  // 수량 입력 필터링 (숫자 + 콤마 포맷)
+  document.querySelectorAll(".qty-input").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      let val = e.target.value.replace(/[^0-9]/g, "");
+      e.target.value =
+        val === "" ? "" : parseInt(val, 10).toLocaleString("ko-KR");
+      recalcAll();
+    });
+  });
+
+  recalcAll();
+
+  // ── ⌨️ 스마트 공간 내비게이션 (Smart Spatial Navigation) 구현 ──
+  function getActiveInputs() {
+    return Array.from(
+      document.querySelectorAll(
+        "input.qty-input, input.fc-input, textarea.sync-item, .remark-cell textarea",
+      ),
+    ).filter((el) => !el.disabled && !el.readOnly && el.offsetParent !== null);
+  }
+
+  // 🎯 텍스트 영역(Textarea) 내부의 커서 상태가 상하좌우 가장자리에 닿아있는지 판별하는 엣지 판정식
+  function isCursorAtBoundary(textarea, direction) {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const val = textarea.value;
+
+    if (direction === "up" || direction === "left") {
+      return start === 0 && end === 0;
+    }
+    if (direction === "down" || direction === "right") {
+      return start === val.length && end === val.length;
+    }
+    return false;
+  }
+
+  function findSpatialTarget(currentEl, direction) {
+    const inputs = getActiveInputs();
+    const curRect = currentEl.getBoundingClientRect();
+    const curX = curRect.left + curRect.width / 2;
+    const curY = curRect.top + curRect.height / 2;
+
+    let candidates = [];
+
+    inputs.forEach((el) => {
+      if (el === currentEl) return;
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+
+      if (direction === "up" && y < curY - 5) {
+        candidates.push({ el, x, y });
+      } else if (direction === "down" && y > curY + 5) {
+        candidates.push({ el, x, y });
+      }
+    });
+
+    if (candidates.length === 0) return null;
+
+    // 수직 거리가 우선이며, 수직 거리가 유사할 경우 수평 거리가 가까운 항목 선택
+    candidates.sort((a, b) => {
+      const dyA = Math.abs(a.y - curY);
+      const dyB = Math.abs(b.y - curY);
+
+      if (Math.abs(dyA - dyB) > 15) {
+        return dyA - dyB;
+      }
+      return Math.abs(a.x - curX) - Math.abs(b.x - curX);
+    });
+
+    return candidates[0].el;
+  }
+
+  document.addEventListener("keydown", (e) => {
+    const target = e.target;
+    if (!target.matches("input.qty-input, input.fc-input, textarea")) return;
+
+    const isTextarea = target.tagName.toLowerCase() === "textarea";
+
+    // 텍스트 영역 내에서는 엔터키 입력 시 다음 칸으로 넘어가지 않고 줄바꿈이 정상 작동하게 예외 처리
+    if (isTextarea && e.key === "Enter") {
+      return;
+    }
+
+    const inputs = getActiveInputs();
+    const index = inputs.indexOf(target);
+    if (index === -1) return;
+
+    let nextTarget = null;
+
+    if (e.key === "ArrowLeft") {
+      if (isTextarea && !isCursorAtBoundary(target, "left")) return;
+      if (index > 0) {
+        nextTarget = inputs[index - 1];
+      }
+      e.preventDefault();
+    } else if (e.key === "ArrowRight" || e.key === "Enter") {
+      if (
+        isTextarea &&
+        e.key === "ArrowRight" &&
+        !isCursorAtBoundary(target, "right")
+      )
+        return;
+      if (index < inputs.length - 1) {
+        nextTarget = inputs[index + 1];
+      }
+      e.preventDefault();
+    } else if (e.key === "ArrowUp") {
+      if (isTextarea && !isCursorAtBoundary(target, "up")) return;
+      e.preventDefault();
+      nextTarget = findSpatialTarget(target, "up");
+    } else if (e.key === "ArrowDown") {
+      if (isTextarea && !isCursorAtBoundary(target, "down")) return;
+      e.preventDefault();
+      nextTarget = findSpatialTarget(target, "down");
+    }
+
+    if (nextTarget) {
+      nextTarget.focus();
+      if (
+        typeof nextTarget.select === "function" &&
+        nextTarget.tagName.toLowerCase() !== "textarea"
+      ) {
+        nextTarget.select(); // 일반 인풋 영역에 진입할 때만 텍스트 전체 선택
+      }
+    }
+  });
+
+  // 🛡️ 2. Firebase 실시간 동기화 커넥션 코어
+  const syncItems = document.querySelectorAll(".sync-item");
+  let currentRef = null;
+
+  function loadLogData(dateStr) {
+    if (currentRef) currentRef.off();
+    currentRef = db.ref("dryice_status/" + dateStr);
+
+    currentRef.on("value", (snapshot) => {
+      const data = snapshot.val() || {};
+      syncItems.forEach((item) => {
+        if (document.activeElement !== item) {
+          item.value = data[item.id] || "";
+        }
+      });
+      recalcAll();
+
+      // 데이터 수신 완료 후 화면 표출 높이를 실시간 글 수에 맞춰 동적 세팅
+      setTimeout(adjustRemarkHeight, 50);
+    });
+  }
+
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      syncItems.forEach((item) => {
+        item.addEventListener("input", (e) => {
+          if (currentRef) {
+            currentRef.child(e.target.id).set(e.target.value);
+          }
+        });
+      });
+
+      dateInput.addEventListener("change", (e) => {
+        loadLogData(e.target.value);
+        updateDayDisplay(e.target.value);
+      });
+
+      loadLogData(dateInput.value);
+      updateDayDisplay(dateInput.value);
+    } else {
+      window.location.replace("index.html");
+    }
+  });
 });
 
 // 자정 경과 시 자동 세션 새로고침 안전장치
 function scheduleMidnightRefresh() {
-    const now = new Date();
-    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5);
-    const msUntilMidnight = tomorrow.getTime() - now.getTime();
-    setTimeout(() => { window.location.reload(true); }, msUntilMidnight);
+  const now = new Date();
+  const tomorrow = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1,
+    0,
+    0,
+    5,
+  );
+  const msUntilMidnight = tomorrow.getTime() - now.getTime();
+  setTimeout(() => {
+    window.location.reload(true);
+  }, msUntilMidnight);
 }
 scheduleMidnightRefresh();

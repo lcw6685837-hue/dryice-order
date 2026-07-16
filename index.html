@@ -23,13 +23,25 @@
     <div class="w-full max-w-[1500px] flex-1 flex flex-col">
 
         <div class="flex flex-col gap-3 mb-4">
-            <div class="flex justify-between items-center w-full relative z-20">
+            <div class="flex justify-between items-center w-full relative z-20 gap-3">
                 <div class="flex-1"></div>
 
+                <!-- 일시 선택 영역 -->
                 <div class="flex items-center gap-3 bg-[#1e293b] px-6 py-2 rounded-full border border-slate-600 shadow-inner print:border-none print:bg-transparent shrink-0">
                     <span class="text-slate-400 font-bold text-sm tracking-widest print:text-black">일 시 :</span>
                     <input type="date" id="log-date" class="bg-transparent border-none text-xl font-black text-amber-400 outline-none cursor-pointer print:text-black text-center">
                     <span id="log-day" class="text-xl font-black text-amber-400 ml-1 print:text-black"></span>
+                </div>
+
+                <!-- 📅 좌우 신속 날짜 이동 패널 -->
+                <div class="flex items-center bg-[#1e293b] px-3 py-1.5 rounded-full border border-slate-600 shadow-inner no-print shrink-0">
+                    <button id="btn-prev-date" class="text-amber-400 hover:text-amber-300 active:scale-95 transition px-3 py-1 flex items-center justify-center" title="이전 날짜">
+                        <i class="fas fa-chevron-left text-lg"></i>
+                    </button>
+                    <div class="w-[1px] h-4 bg-slate-600 mx-1"></div>
+                    <button id="btn-next-date" class="text-amber-400 hover:text-amber-300 active:scale-95 transition px-3 py-1 flex items-center justify-center" title="다음 날짜">
+                        <i class="fas fa-chevron-right text-lg"></i>
+                    </button>
                 </div>
 
                 <div class="flex-1 flex justify-end gap-2 no-print shrink-0">
