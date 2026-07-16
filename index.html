@@ -58,6 +58,20 @@
                         <i class="fas fa-snowflake text-[1.6rem] text-black hidden print:block"></i>
                     </div>
                     <h1 class="text-[2.2rem] font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 tracking-widest drop-shadow-md print:text-[1.6rem] print:text-black">DRYICE 주문 &amp; 생산현황</h1>
+                    
+                    <!-- 🎨 주문 차수 및 글자색 선택 제어 패널 -->
+                    <div class="flex items-center gap-1.5 bg-[#141b2e]/90 px-3 py-1 rounded-full border border-slate-700/80 no-print shadow-lg ml-4">
+                        <span class="text-[11px] font-bold text-slate-400 mr-1.5 whitespace-nowrap">주문 수량 색상:</span>
+                        <button type="button" id="btn-phase-1" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-sky-500/10 text-sky-400 border border-sky-500/30 hover:bg-sky-500/20 transition flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> 1차주문
+                        </button>
+                        <button type="button" id="btn-phase-2" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700/50 transition flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> 2차주문
+                        </button>
+                        <button type="button" id="btn-phase-3" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700/50 transition flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> 3차주문
+                        </button>
+                    </div>
                 </div>
 
                 <div class="text-slate-500 font-bold text-sm tracking-widest print:text-black">선도화학(주)</div>

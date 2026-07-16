@@ -25,9 +25,13 @@ textarea { resize: none; }
 .dg-table tbody td.rowtype-cell { color: #94a3b8; font-weight: 600; font-size: 0.7rem; white-space: nowrap; }
 .dg-table tbody td.dest-cell { color: #cbd5e1; font-weight: 700; font-size: 1.56rem; }
 
-/* 🔵 주문수량 행: 블루 테마 (수요/계획) */
+/* 🔵 주문수량 행: 블루 테마 (수요/계획 기본 하이라이트) */
 .dg-table tbody tr.row-order { background-color: rgba(56, 189, 248, 0.10); }
-.dg-table tbody tr.row-order .qty-cell { color: #38bdf8; font-weight: 700; }
+
+/* 🎨 개별 셀 단위 실시간 주문수량 차수별 글자색 지정 */
+.dg-table tbody tr.row-order .qty-cell.phase-1 { color: #38bdf8 !important; } /* 1차: 하늘색 */
+.dg-table tbody tr.row-order .qty-cell.phase-2 { color: #f87171 !important; } /* 2차: 빨간색 */
+.dg-table tbody tr.row-order .qty-cell.phase-3 { color: #4ade80 !important; } /* 3차: 녹색 */
 
 /* 🟢 생산량 행: 에메랄드 그린 테마 (실행/실적) */
 .dg-table tbody tr.row-prod { background-color: rgba(16, 185, 129, 0.08); }
@@ -91,8 +95,11 @@ textarea { resize: none; }
     .dg-table tbody tr.client-start td { border-top: 2px solid #000000 !important; }
 
     .qty-cell { color: #000000 !important; font-size: 0.5rem !important; padding: 0 1px !important; }
+    
+    /* 인쇄 시 가독성을 위해 개별 차수 색상을 무시하고 일관되게 선명한 블랙으로 통일 */
     .dg-table tbody tr.row-order .qty-cell,
-    .dg-table tbody tr.row-prod .qty-cell { color: #000000 !important; } /* 인쇄 시 가독성을 위해 검정 통일 */
+    .dg-table tbody tr.row-prod .qty-cell { color: #000000 !important; }
+    
     .dg-table tbody td.unprod-cell, .dg-table tbody td.row-total-cell, .dg-table tfoot td { font-size: 0.5rem !important; }
     .fc-input { color: #000000 !important; font-size: 0.85rem !important; }
     .remark-cell textarea { font-size: 0.95rem !important; padding: 2px 4px !important; }

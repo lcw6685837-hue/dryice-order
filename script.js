@@ -26,6 +26,9 @@ if (!firebase.apps.length) {
 }
 const db = firebase.database();
 
+// 🎨 글로벌 활성화 차수 변수 (신규 개별 바인딩을 위해 전역 관리)
+let currentGlobalPhase = "1";
+
 // 품목 정의 (PDF: DRYICE 주문 & 생산현황 열 구성)
 const PRODUCTS = [
   { key: "p100", label: "100kg" },
@@ -43,18 +46,17 @@ const PRODUCTS = [
   { key: "k20p", label: "3/16펠렛" },
 ];
 
-// 거래처 정의 (고정 14곳, PDF 기준)
+// 🚚 거래처 최신 데이터 개편 (한국콜드체인(B) 삭제 및 경기남부명 수정 완료!)
 const CLIENTS = [
   { name: "화일공항", dest: "공항" },
   { name: "화일경보", dest: "공항" },
-  { name: "화일상사(A)", dest: "용인" },
-  { name: "화일상사(B)", dest: "용인" },
+  { name: "빙그레(논산)", dest: "충청" },
+  { name: "화일(빙그레)용인", dest: "용인" },
+  { name: "화일상사", dest: "용인" },
   { name: "영재상사", dest: "서울" },
-  { name: "한국콜드체인(A)", dest: "이천" },
-  { name: "한국콜드체인(B)", dest: "이천" },
-  { name: "경기남부(A)", dest: "평택" },
-  { name: "경기남부(B)", dest: "평택" },
-  { name: "용인드라이", dest: "서산" },
+  { name: "한국콜드체인", dest: "이천" }, // 💡 '한국콜드체인(B)' 삭제 반영!
+  { name: "경기남부", dest: "평택" }, // 💡 '경기남부(A)' -> '경기남부'로 수정 반영!
+  { name: "용인드라이(대상)", dest: "서산" },
   { name: "엠엔엠", dest: "서산" },
   { name: "프레임", dest: "서울" },
   { name: "세종상사", dest: "이천" },
@@ -67,23 +69,25 @@ const ROW_TYPES = [
   { key: "unprod", label: "미생산", cls: "row-unprod" },
 ];
 
-// 익일 예상 물량 - 좌/우 거래처 목록
+// 익일 예상 물량 - 좌/우 거래처 목록 (한국콜드체인(B) 일관성 삭제 완료)
 const FC_LEFT = [
   { id: "fc_export", label: "수출", special: true },
   { id: "fc_airport", label: "공항" },
   { id: "fc_gyeongbo", label: "경보" },
   { id: "fc_sejong", label: "세종상사" },
-  { id: "fc_kcc_a", label: "한국콜드체인(A)" },
-  { id: "fc_kcc_b", label: "한국콜드체인(B)" },
+  { id: "fc_kcc_a", label: "한국콜드체인" }, // 💡 한국콜드체인(B) 항목 리스트에서 제거 완료!
   { id: "fc_gnb", label: "경기남부" },
   { id: "fc_mnm", label: "엠엔엠" },
   { id: "fc_hwail", label: "화일상사" },
 ];
+
+// 익일 예상 물량 - 우측 거래처 명칭 변경 및 신규 추가
 const FC_RIGHT = [
-  { id: "fc_yongin", label: "용인드라이" },
+  { id: "fc_yongin", label: "용인드라이(D)" }, // 💡 '용인드라이' -> '용인드라이(D)'로 변경 완료!
   { id: "fc_frame", label: "프레임" },
-  { id: "fc_file", label: "화일" },
+  { id: "fc_file", label: "세종(빙그레)" }, // 💡 '화일' -> '세종(빙그레)'로 변경 완료!
   { id: "fc_youngjae", label: "영재" },
+  { id: "fc_hwail_bing", label: "화일(빙그레)" }, // 🆕 '화일(빙그레)' 항목 신규 추가 완료!
 ];
 
 function parseCommaNum(str) {
@@ -95,7 +99,7 @@ function formatCommaNum(num) {
   return num.toLocaleString("ko-KR");
 }
 
-// ── 🏰 웹 로딩 성벽 시작 (이 내부에서 선전된 도구들은 안전하게 상호 유기 작용합니다) ──
+// ── 🏰 웹 로딩 성벽 시작 ──
 document.addEventListener("DOMContentLoaded", () => {
   const dateInput = document.getElementById("log-date");
   const dayDisplay = document.getElementById("log-day");
@@ -128,13 +132,72 @@ document.addEventListener("DOMContentLoaded", () => {
       const dd = String(currentDate.getDate()).padStart(2, "0");
       dateInput.value = `${yyyy}-${mm}-${dd}`;
 
-      // change 이벤트를 강제로 발생시켜 Firebase 데이터 리로딩 및 요일 UI 동기화 수행
       dateInput.dispatchEvent(new Event("change"));
     }
   }
 
   if (prevBtn) prevBtn.addEventListener("click", () => shiftDate(-1));
   if (nextBtn) nextBtn.addEventListener("click", () => shiftDate(1));
+
+  // ── 🎨 2. 주문수량 차수(글자색) 제어 로직 (개별 셀 보존식) ──
+  function setOrderPhase(phase, saveToDb = true) {
+    currentGlobalPhase = phase;
+
+    const btn1 = document.getElementById("btn-phase-1");
+    const btn2 = document.getElementById("btn-phase-2");
+    const btn3 = document.getElementById("btn-phase-3");
+
+    // 버튼 디자인 원복
+    [btn1, btn2, btn3].forEach((btn) => {
+      if (!btn) return;
+      btn.className =
+        "phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700/50 transition flex items-center gap-1";
+      btn.querySelector("span").className =
+        "w-1.5 h-1.5 rounded-full bg-slate-500";
+    });
+
+    // 선택한 차수 하이라이트 활성화
+    if (phase === "1") {
+      btn1.className =
+        "phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-sky-500/20 text-sky-400 border border-sky-500/40 hover:bg-sky-500/30 transition flex items-center gap-1";
+      btn1.querySelector("span").className =
+        "w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse";
+    } else if (phase === "2") {
+      btn2.className =
+        "phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-rose-500/20 text-rose-400 border border-rose-500/40 hover:bg-rose-500/30 transition flex items-center gap-1";
+      btn2.querySelector("span").className =
+        "w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse";
+    } else if (phase === "3") {
+      btn3.className =
+        "phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 transition flex items-center gap-1";
+      btn3.querySelector("span").className =
+        "w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse";
+    }
+
+    // 값이 비어있는 모든 주문 입력창만 현재 활성화된 차수 색상으로 대기 (타이핑 시 해당 색상 즉시 적용)
+    document.querySelectorAll(".qty-cell-order").forEach((item) => {
+      if (item.value === "") {
+        item.classList.remove("phase-1", "phase-2", "phase-3");
+        item.classList.add(`phase-${phase}`);
+      }
+    });
+
+    // Firebase 데이터베이스에 동시 전송 (실시간 저장)
+    if (saveToDb && currentRef) {
+      currentRef.child("order_phase").set(phase);
+    }
+  }
+
+  // 각 차수 버튼에 마우스 클릭 리스너 연결
+  document
+    .getElementById("btn-phase-1")
+    .addEventListener("click", () => setOrderPhase("1"));
+  document
+    .getElementById("btn-phase-2")
+    .addEventListener("click", () => setOrderPhase("2"));
+  document
+    .getElementById("btn-phase-3")
+    .addEventListener("click", () => setOrderPhase("3"));
 
   // ── 메인 그리드(거래처 x 품목) 동적 생성 ──
   const dgBody = document.getElementById("dg-body");
@@ -157,7 +220,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (rt.key === "unprod") {
           html += `<td id="c${ci}_${p.key}_unprod" class="unprod-cell"></td>`;
         } else {
-          html += `<td><input type="text" inputmode="numeric" class="qty-cell sync-item qty-input" id="c${ci}_${p.key}_${rt.key}" placeholder=""></td>`;
+          const isOrder = rt.key === "order";
+          const extraClass = isOrder ? "qty-cell-order phase-1" : "";
+          html += `<td><input type="text" inputmode="numeric" class="qty-cell sync-item qty-input ${extraClass}" id="c${ci}_${p.key}_${rt.key}" placeholder=""></td>`;
         }
       });
 
@@ -222,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fcRightBody.appendChild(tr);
   });
 
-  // ── ✍️ 2. '영재' 바로 하단에 수기 입력 특이사항 패널 배치 (높이 자동 확장 구조 적용) ──
+  // ── ✍️ '영재' 바로 하단에 수기 입력 특이사항 패널 배치 ──
   const remarkTr = document.createElement("tr");
   remarkTr.innerHTML = `
         <td colspan="2" class="p-1 align-top border-t border-slate-700/50">
@@ -230,12 +295,11 @@ document.addEventListener("DOMContentLoaded", () => {
         </td>`;
   fcRightBody.appendChild(remarkTr);
 
-  // 🎯 수기 입력란의 텍스트 양에 맞춰 세로 높이를 유연하게 자동 조절하는 엔진
+  // 수기 입력란의 텍스트 양에 맞춰 세로 높이를 유연하게 자동 조절하는 엔진
   function adjustRemarkHeight() {
     const textarea = document.getElementById("fc_right_remark");
     if (textarea) {
       textarea.style.height = "auto";
-      // 스크롤바 생성 없이 컨텍스트 전체가 완전히 다 보이도록 높이 값 보정
       textarea.style.height = textarea.scrollHeight + "px";
     }
   }
@@ -304,6 +368,11 @@ document.addEventListener("DOMContentLoaded", () => {
       e.target.value =
         val === "" ? "" : parseInt(val, 10).toLocaleString("ko-KR");
       recalcAll();
+
+      if (e.target.id.endsWith("_order")) {
+        e.target.classList.remove("phase-1", "phase-2", "phase-3");
+        e.target.classList.add(`phase-${currentGlobalPhase}`);
+      }
     });
   });
 
@@ -318,7 +387,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ).filter((el) => !el.disabled && !el.readOnly && el.offsetParent !== null);
   }
 
-  // 🎯 텍스트 영역(Textarea) 내부의 커서 상태가 상하좌우 가장자리에 닿아있는지 판별하는 엣지 판정식
   function isCursorAtBoundary(textarea, direction) {
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
@@ -376,7 +444,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isTextarea = target.tagName.toLowerCase() === "textarea";
 
-    // 텍스트 영역 내에서는 엔터키 입력 시 다음 칸으로 넘어가지 않고 줄바꿈이 정상 작동하게 예외 처리
     if (isTextarea && e.key === "Enter") {
       return;
     }
@@ -420,12 +487,12 @@ document.addEventListener("DOMContentLoaded", () => {
         typeof nextTarget.select === "function" &&
         nextTarget.tagName.toLowerCase() !== "textarea"
       ) {
-        nextTarget.select(); // 일반 인풋 영역에 진입할 때만 텍스트 전체 선택
+        nextTarget.select();
       }
     }
   });
 
-  // 🛡️ 2. Firebase 실시간 동기화 커넥션 코어 (완벽한 유효 범위 안에서 작동 보장)
+  // 🛡️ 3. Firebase 실시간 동기화 커넥션 코어
   const syncItems = document.querySelectorAll(".sync-item");
   let currentRef = null;
 
@@ -439,10 +506,25 @@ document.addEventListener("DOMContentLoaded", () => {
         if (document.activeElement !== item) {
           item.value = data[item.id] || "";
         }
+
+        // 실시간 동기화 데이터 복원 시 각 셀마다 저장되어 있던 고유의 차수 색상 복원
+        if (item.id.endsWith("_order")) {
+          const savedCellPhase = data[item.id + "_phase"];
+          item.classList.remove("phase-1", "phase-2", "phase-3");
+          if (item.value === "") {
+            item.classList.add(`phase-${currentGlobalPhase}`);
+          } else {
+            item.classList.add(`phase-${savedCellPhase || "1"}`);
+          }
+        }
       });
+
+      // 클라우드로부터 활성화된 전역 주문 차수 로드
+      const savedPhase = data["order_phase"] || "1";
+      setOrderPhase(savedPhase, false);
+
       recalcAll();
 
-      // 데이터 수신 완료 후 화면 표출 높이를 실시간 글 수에 맞춰 동적 세팅
       setTimeout(adjustRemarkHeight, 50);
     });
   }
@@ -453,6 +535,16 @@ document.addEventListener("DOMContentLoaded", () => {
         item.addEventListener("input", (e) => {
           if (currentRef) {
             currentRef.child(e.target.id).set(e.target.value);
+
+            if (e.target.id.endsWith("_order")) {
+              if (e.target.value === "") {
+                currentRef.child(e.target.id + "_phase").remove();
+              } else {
+                currentRef
+                  .child(e.target.id + "_phase")
+                  .set(currentGlobalPhase);
+              }
+            }
           }
         });
       });
@@ -465,14 +557,12 @@ document.addEventListener("DOMContentLoaded", () => {
       loadLogData(dateInput.value);
       updateDayDisplay(dateInput.value);
     } else {
-      // index.html 무한 대피 차단 -> login.html로 우회
       window.location.replace("login.html");
     }
   });
 });
 // ── 🏰 웹 로딩 성벽 끝 ──
 
-// 자정 경과 시 자동 세션 새로고침 안전장치 (성벽 바깥 독립 실행부)
 function scheduleMidnightRefresh() {
   const now = new Date();
   const tomorrow = new Date(
