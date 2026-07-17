@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body class="p-4 lg:p-6 min-h-screen flex flex-col items-center">
 
@@ -68,8 +68,11 @@
                         <button type="button" id="btn-phase-2" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700/50 transition flex items-center gap-1">
                             <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> 2차주문
                         </button>
-                        <button type="button" id="btn-phase-3" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700/50 transition flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> 3차주문
+                        <button type="button" id="btn-phase-3" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 transition flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 3차주문
+                        </button>
+                        <button type="button" id="btn-phase-4" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 hover:bg-yellow-500/30 transition flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span> 확 정
                         </button>
                     </div>
                 </div>
@@ -78,12 +81,16 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto rounded-xl border-[3px] border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.2)] print:border-black print:border print:shadow-none">
+        <!-- 🆕 상단 가상 스크롤바 -->
+        <div id="top-scroll-wrapper" class="overflow-x-auto no-print mb-1.5" style="scrollbar-width: thin;">
+            <div id="top-scroll-spacer" style="height: 1px;"></div>
+        </div>
+
+        <div id="table-wrapper" class="overflow-x-auto rounded-xl border-[3px] border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.2)] print:border-none print:border-0 print:shadow-none">
             <table class="dg-table">
                 <colgroup>
                     <col class="col-client">
                     <col class="col-type">
-                    <col class="col-qty">
                     <col class="col-qty">
                     <col class="col-qty">
                     <col class="col-qty">
@@ -102,30 +109,32 @@
                 </colgroup>
                 <thead>
                     <tr>
-                        <th rowspan="2">거래처명</th>
-                        <th rowspan="2">구분</th>
-                        <th colspan="2">웰빗</th>
+                        <th rowspan="3">거래처명</th>
+                        <th rowspan="3">구분</th>
+                        <th colspan="2">PELLET</th> 
                         <th colspan="3">B 타입</th>
-                        <th rowspan="2">400g<br>(19.2kg)</th>
-                        <th rowspan="2">500g<br>(21kg)</th>
-                        <th rowspan="2">600g<br>(21.6kg)</th>
+                        <th colspan="3" class="text-slate-400">1F 자동화</th> 
                         <th colspan="3">30kg</th>
-                        <th rowspan="2">20kg<br>(AP)</th>
-                        <th colspan="1">20kg</th>
-                        <th rowspan="2">계</th>
-                        <th rowspan="2">도착지</th>
-                        <th rowspan="2" class="remark-header">비 고</th>
+                        <th rowspan="3">20kg<br>(AP)</th> 
+                        <th rowspan="3">계</th>
+                        <th rowspan="3">도착지</th>
+                        <th rowspan="3" class="remark-header">비 고</th>
                     </tr>
                     <tr class="sub-head">
-                        <th>100kg<br>(16mm)</th>
-                        <th>200kg<br>(3mm)</th>
-                        <th>150kg</th>
-                        <th>200kg</th>
-                        <th>250kg</th>
-                        <th>블럭</th>
-                        <th>조각</th>
-                        <th>#2</th>
-                        <th>3/16펠렛</th>
+                        <th rowspan="2">100kg<br>(16mm)</th>
+                        <th rowspan="2">200kg<br>(3mm)</th>
+                        <th rowspan="2">150kg</th>
+                        <th rowspan="2">200kg</th>
+                        <th rowspan="2">250kg</th>
+                        <th rowspan="2">400g<br>(19.2kg)</th> 
+                        <th rowspan="2">500g<br>(21kg)</th>  
+                        <th rowspan="2">600g<br>(21.6kg)</th> 
+                        <th rowspan="2">블럭</th>
+                        <th colspan="2">조각</th>
+                    </tr>
+                    <tr class="sub-head">
+                        <th>8P</th>
+                        <th>16P</th>
                     </tr>
                 </thead>
                 <tbody id="dg-body"></tbody>
@@ -137,8 +146,8 @@
             </table>
         </div>
 
-        <div class="mt-6 rounded-xl border-[2px] border-slate-600 overflow-hidden print:border-black">
-            <div class="bg-slate-800/80 text-center py-2 font-black tracking-widest text-lg print:bg-[#e2e8f0] print:text-black">익일 예상 물량</div>
+        <div class="mt-6 rounded-xl border-[2px] border-slate-600 overflow-hidden print:border-none print:border-0">
+            <div class="bg-slate-800/80 text-center py-2 font-black tracking-widest text-lg print:bg-white print:text-black">익일 예상 물량</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-0 items-start">
                 <table class="fc-table w-full border-collapse">
                     <tbody id="fc-left-body"></tbody>
@@ -147,12 +156,12 @@
                     <tbody id="fc-right-body"></tbody>
                 </table>
             </div>
-            <div class="fc-note-box bg-amber-300/90 text-black font-bold text-sm px-4 py-2 text-right print:text-black">
+            <div class="fc-note-box bg-amber-300/90 text-black font-bold text-sm px-4 py-2 text-right print:text-black print:bg-white">
                 파렛트 상차시 작업 후 랩핑, 살포 부탁드립니다
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=5"></script>
 </body>
 </html>

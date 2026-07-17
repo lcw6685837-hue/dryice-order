@@ -3,6 +3,8 @@ body { font-family: 'Pretendard', sans-serif; background-color: #0b1120; color: 
 
 input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 textarea { resize: none; }
+
+/* 둥근 형태의 커스텀 스크롤바 */
 ::-webkit-scrollbar { height: 8px; width: 8px; }
 ::-webkit-scrollbar-track { background: #0f172a; }
 ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
@@ -11,41 +13,51 @@ textarea { resize: none; }
 .dg-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1700px; }
 .dg-table th, .dg-table td { border: 1px solid #334155; padding: 3px 4px; text-align: center; font-size: 0.78rem; overflow: hidden; }
 
-/* 열 너비: 비고란을 크게, 나머지는 축소 (PDF 원본 비율 반영) */
-.col-client { width: 6%; }
-.col-type { width: 4%; }
-.col-qty { width: 3.6%; }
-.col-total { width: 4.2%; }
-.col-dest { width: 4%; }
-.col-remark { width: 35%; }
+/* 너비 배정 */
+.col-client { width: 9%; }   
+.col-type { width: 5%; }     
+.col-qty { width: 4.7%; }    
+.col-total { width: 4.6%; }  
+.col-dest { width: 2%; }     
+.col-remark { width: 23%; }  
+
 .dg-table thead th { background-color: rgba(30, 41, 59, 0.85); color: #cbd5e1; font-weight: 800; letter-spacing: 0.02em; text-align: center !important; }
 .dg-table thead tr.sub-head th { background-color: rgba(30, 41, 59, 0.55); font-size: 0.72rem; }
-.dg-table thead th.remark-header { text-align: center !important; font-size: 1.56rem !important; }
+
+/* 비고 헤더 글자 크기 축소 */
+.dg-table thead th.remark-header { text-align: center !important; font-size: 0.78rem !important; font-weight: 800; }
+
 .dg-table tbody td.client-cell { color: #f1f5f9; font-weight: 700; font-size: 0.82rem; }
 .dg-table tbody td.rowtype-cell { color: #94a3b8; font-weight: 600; font-size: 0.7rem; white-space: nowrap; }
-.dg-table tbody td.dest-cell { color: #cbd5e1; font-weight: 700; font-size: 1.56rem; }
 
-/* 🔵 주문수량 행: 블루 테마 (수요/계획 기본 하이라이트) */
+/* 도착지 셀 글자 크기 보존 */
+.dg-table tbody td.dest-cell { color: #cbd5e1; font-weight: 700; font-size: 0.78rem; }
+
+/* 🔵 주문수량 행: 블루 테마 */
 .dg-table tbody tr.row-order { background-color: rgba(56, 189, 248, 0.10); }
 
-/* 🎨 개별 셀 단위 실시간 주문수량 차수별 글자색 지정 */
-.dg-table tbody tr.row-order .qty-cell.phase-1 { color: #38bdf8 !important; } /* 1차: 하늘색 */
-.dg-table tbody tr.row-order .qty-cell.phase-2 { color: #f87171 !important; } /* 2차: 빨간색 */
-.dg-table tbody tr.row-order .qty-cell.phase-3 { color: #4ade80 !important; } /* 3차: 녹색 */
+/* 개별 셀 단위 실시간 주문수량 차수별 글자색 지정 */
+.dg-table tbody tr.row-order .qty-cell.phase-1 { color: #38bdf8 !important; } 
+.dg-table tbody tr.row-order .qty-cell.phase-2 { color: #f87171 !important; } 
+.dg-table tbody tr.row-order .qty-cell.phase-3 { color: #4ade80 !important; } 
+.dg-table tbody tr.row-order .qty-cell.phase-4 { color: #facc15 !important; } 
 
-/* 🟢 생산량 행: 에메랄드 그린 테마 (실행/실적) */
-.dg-table tbody tr.row-prod { background-color: rgba(16, 185, 129, 0.08); }
-.dg-table tbody tr.row-prod .qty-cell { color: #34d399; font-weight: 700; }
+/* 🟢 생산량 행 */
+.dg-table tbody tr.row-prod { background-color: rgba(255, 255, 255, 0.04); }
+.dg-table tbody tr.row-prod .qty-cell { color: #ffffff !important; font-weight: 700; }
 
 /* 🟠 미생산 행 */
 .dg-table tbody tr.row-unprod { background-color: rgba(251, 146, 60, 0.08); }
 .dg-table tbody td.unprod-cell { font-weight: 700; color: #fdba74; font-size: 1.05rem; }
 
 .dg-table tbody td.row-total-cell { font-weight: 800; color: #67e8f9; background-color: rgba(6, 182, 212, 0.08); font-size: 1.05rem; }
-.dg-table tfoot td { background-color: rgba(16, 185, 129, 0.18); color: #6ee7b7; font-weight: 800; font-size: 1.05rem; }
-.dg-table tfoot td.total-label { color: #d1fae5; }
+.dg-table tfoot td { background-color: rgba(255, 255, 255, 0.08); color: #e2e8f0; font-weight: 800; font-size: 1.05rem; }
+.dg-table tfoot td.total-label { color: #ffffff; }
 
-/* 거래처 단위 구분: 짝/홀 음영 + 그룹 시작 경계선으로 수기 입력 시 혼동 방지 */
+/* 빙그레(논산) 미생산 품목 시각 락인 차단 블록 스타일 */
+.no-prod-block { color: #64748b; font-weight: 700; text-align: center; font-size: 0.78rem; background-color: rgba(30, 41, 59, 0.3); select-none: none; }
+
+/* 거래처 단위 구분 배경 음영 */
 .dg-table tbody tr.client-even td.client-cell,
 .dg-table tbody tr.client-even td.dest-cell,
 .dg-table tbody tr.client-even td.remark-cell { background-color: rgba(30, 41, 59, 0.75); }
@@ -56,56 +68,172 @@ textarea { resize: none; }
 
 .qty-cell { width: 100%; background: transparent; border: none; outline: none; text-align: center; font-size: 1.05rem; font-weight: 600; padding: 2px; }
 .qty-cell:focus { background-color: rgba(59, 130, 246, 0.2); }
-.remark-cell textarea { width: 100%; height: 100%; min-height: 70px; background: transparent; border: none; outline: none; color: #e2e8f0; font-size: 1.3rem; line-height: 1.4; text-align: left; padding: 4px 8px; }
+
+/* 비고란 입력 내용 글자 크기 보존 */
+.remark-cell textarea { width: 100%; height: 100%; min-height: 70px; background: transparent; border: none; outline: none; color: #e2e8f0; font-size: 0.82rem; line-height: 1.4; text-align: left; padding: 4px 8px; }
+
+/* 인쇄용 미러링 디브 */
+.print-remark-mirror { display: none; }
 
 .fc-input { background: transparent; border: none; outline: none; color: #fde68a; font-weight: 700; text-align: left; width: 100%; font-size: 1.3rem; padding: 2px 6px; }
 .fc-input:focus { background-color: rgba(59, 130, 246, 0.15); }
 
-/* 🍒 인쇄 엔진 최적화: A4 세로 맞춤 */
+/* 익일 예상 물량 테이블 격자 구분선 및 디자인 대대적 강화 */
+.fc-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: rgba(15, 23, 42, 0.4);
+}
+.fc-table td, .fc-table th {
+    border: 1px solid #334155 !important; 
+    padding: 6px 8px;
+    vertical-align: middle;
+}
+.fc-table tr {
+    transition: background-color 0.15s ease-in-out;
+}
+.fc-table tr:hover {
+    background-color: rgba(59, 130, 246, 0.04);
+}
+
+/* 서브 인풋 필드 고급화 테마 */
+.fc-sub-input {
+    background-color: rgba(30, 41, 59, 0.6);
+    border: 1px solid #475569;
+    border-radius: 4px;
+    color: #fde68a;
+    font-weight: 700;
+    padding: 2px 4px;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+}
+.fc-sub-input:focus {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* [화면용] 데이터별 최적 너비 락인 적용 */
+.fc-qty-input { width: 3.5rem !important; }
+.fc-time-input { width: 4.8rem !important; }
+.fc-note-input { min-width: 110px; }
+
+/* 상단 가상 스크롤바 */
+#top-scroll-wrapper { width: 100%; overflow-y: hidden; }
+
+/* 🍒 프린트 미디어 쿼리 최적화 */
 @media print {
-    @page { size: A4 portrait; margin: 8mm; }
+    @page { size: A4 portrait; margin: 5mm; } 
     body { background-color: #ffffff !important; color: #000000 !important; }
 
     * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        -webkit-print-color-adjust: economy !important;
+        print-color-adjust: economy !important;
         text-shadow: none !important;
         box-shadow: none !important;
         color: #000000 !important;
+        background-color: #ffffff !important; 
+        background: #ffffff !important;
     }
 
     .no-print { display: none !important; }
+    #top-scroll-wrapper { display: none !important; }
 
-    .dg-table { min-width: 0 !important; width: 100% !important; }
-    .dg-table th, .dg-table td { border: 1px solid #000000 !important; padding: 1px 2px !important; font-size: 0.5rem !important; }
-    .dg-table thead th { background-color: #e2e8f0 !important; }
-    .dg-table thead tr.sub-head th { background-color: #f1f5f9 !important; }
-    .dg-table thead th.remark-header { font-size: 1rem !important; }
-    .dg-table tbody td.client-cell { background-color: #f8fafc !important; }
-    .dg-table tbody td.dest-cell { font-size: 0.85rem !important; }
-    .dg-table tbody tr.row-order { background-color: #dbeafe !important; }
-    .dg-table tbody tr.row-prod { background-color: #f0fdf4 !important; }
-    .dg-table tbody tr.row-unprod { background-color: #ffedd5 !important; }
-    .dg-table tbody td.row-total-cell { background-color: #cffafe !important; }
-    .dg-table tfoot td { background-color: #bbf7d0 !important; }
+    .dg-table { min-width: 0 !important; width: 100% !important; border: 1px solid #cbd5e1 !important; }
+    .dg-table th, .dg-table td { 
+        border: 1px solid #cbd5e1 !important; 
+        padding: 2px 1px !important; 
+        font-size: 0.52rem !important; 
+        background-color: #ffffff !important; 
+        word-break: keep-all !important; 
+        overflow: visible !important;   
+    }
+    
+    .dg-table thead th { background-color: #ffffff !important; font-weight: 900; }
+    .dg-table thead tr.sub-head th { background-color: #ffffff !important; font-size: 0.48rem !important; }
+    .dg-table thead th.remark-header { font-size: 0.52rem !important; }
+
+    .no-prod-block { 
+        color: #dc2626 !important; 
+        font-weight: 800 !important; 
+        font-size: 0.52rem !important; 
+        text-align: center !important; 
+        background-color: #ffffff !important; 
+    }
+
+    .dg-table tbody td.client-cell { 
+        background-color: #ffffff !important; 
+        font-weight: 800; 
+        font-size: 0.55rem !important; 
+        line-height: 1.2;
+    }
+    .dg-table tbody td.dest-cell { font-size: 0.48rem !important; background-color: #ffffff !important; }
+    
+    .dg-table tbody tr.row-order { background-color: #ffffff !important; }
+    .dg-table tbody tr.row-prod { background-color: #ffffff !important; }
+    .dg-table tbody tr.row-unprod { background-color: #ffffff !important; }
+    .dg-table tbody td.row-total-cell { background-color: #ffffff !important; }
+    .dg-table tfoot td { background-color: #ffffff !important; border-top: 1px solid #cbd5e1 !important; }
 
     .dg-table tbody tr.client-odd td.client-cell,
     .dg-table tbody tr.client-odd td.dest-cell,
-    .dg-table tbody tr.client-odd td.remark-cell { background-color: #e2e8f0 !important; }
-    .dg-table tbody tr.client-start td { border-top: 2px solid #000000 !important; }
+    .dg-table tbody tr.client-odd td.remark-cell { background-color: #ffffff !important; }
+    .dg-table tbody tr.client-start td { border-top: 1px solid #cbd5e1 !important; }
 
-    .qty-cell { color: #000000 !important; font-size: 0.5rem !important; padding: 0 1px !important; }
+    .qty-cell { color: #000000 !important; font-size: 0.52rem !important; padding: 0 !important; background-color: #ffffff !important; }
     
-    /* 인쇄 시 가독성을 위해 개별 차수 색상을 무시하고 일관되게 선명한 블랙으로 통일 */
     .dg-table tbody tr.row-order .qty-cell,
     .dg-table tbody tr.row-prod .qty-cell { color: #000000 !important; }
     
-    .dg-table tbody td.unprod-cell, .dg-table tbody td.row-total-cell, .dg-table tfoot td { font-size: 0.5rem !important; }
-    .fc-input { color: #000000 !important; font-size: 0.85rem !important; }
-    .remark-cell textarea { font-size: 0.95rem !important; padding: 2px 4px !important; }
+    .dg-table tbody td.unprod-cell, .dg-table tbody td.row-total-cell, .dg-table tfoot td { font-size: 0.52rem !important; color: #000000 !important; }
+    
+    /* 🆕 비고란 실제 입력창 인쇄 시 완전 은닉 (이중 인쇄 원천 차단 복원) */
+    .remark-cell textarea { display: none !important; }
+
+    .print-remark-mirror {
+        display: block !important;
+        white-space: pre-wrap; 
+        text-align: left;
+        font-size: 0.52rem !important; 
+        line-height: 1.4;
+        word-break: break-all;
+        color: #000000 !important;
+        padding: 2px 4px !important;
+        background-color: #ffffff !important;
+    }
+
+    /* 익일 예상 물량 인쇄 시 가로선, 세로선 깨짐 및 자동 줄바꿈 원천 차단 */
+    .fc-table { border: 1px solid #cbd5e1 !important; }
+    .fc-table th, .fc-table td { 
+        border: 1px solid #cbd5e1 !important; 
+        padding: 4px 6px !important; 
+        font-size: 0.65rem !important; 
+        background-color: #ffffff !important; 
+        color: #000000 !important;
+        white-space: nowrap !important; 
+        word-break: keep-all !important;
+    }
+    
+    /* 인쇄 시 입력 필드의 보더만 삭제하고, 물리적 너비는 칼같이 보존하도록 세팅 */
+    .fc-sub-input {
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        font-weight: 800 !important;
+        text-align: center !important;
+        display: inline-block !important; 
+    }
+
+    /* 인쇄 목적에 최적화된 용도별 픽셀 너비 락인 규격 */
+    .fc-qty-input { width: 35px !important; }  
+    .fc-time-input { width: 62px !important; } 
+    .fc-note-input { width: 140px !important; } 
+
     ::placeholder { color: transparent !important; }
 
-    .fc-table th, .fc-table td { border: 1px solid #000000 !important; padding: 2px 4px !important; font-size: 0.7rem !important; }
-    .fc-note-box { background-color: #fef08a !important; border: 1px solid #000 !important; }
-    .text-\[2\.2rem\] { font-size: 1.3rem !important; margin: 0 !important; line-height: 1; }
+    .fc-note-box { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; color: #000000 !important; }
+    .text-\[2\.2rem\] { font-size: 1.3rem !important; margin: 0 !important; line-height: 1; color: #000000 !important; }
 }
