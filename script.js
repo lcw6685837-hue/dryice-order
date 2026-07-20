@@ -29,20 +29,20 @@ const db = firebase.database();
 // 🎨 글로벌 활성화 차수 변수
 let currentGlobalPhase = '1';
 
-// 품목 정의
+// 📦 품목 정의 및 고시인성 툴팁용 마스터 데이터 개편
 const PRODUCTS = [
-    { key: 'p100', label: '100kg' },
-    { key: 'p200', label: '200kg' },
-    { key: 'b150', label: '150kg' },
-    { key: 'b200', label: '200kg' },
-    { key: 'b250', label: '250kg' },
-    { key: 'g400', label: '400g' },
-    { key: 'g500', label: '500g' },
-    { key: 'g600', label: '600g' },
-    { key: 'k30a', label: '블럭' },
-    { key: 'k30b', label: '8P' }, 
-    { key: 'k30c', label: '16P' }, 
-    { key: 'k20ap', label: '20kg(AP)' }
+    { key: 'p100', label: '100kg', full: 'PELLET 100kg (16mm)' },
+    { key: 'p200', label: '200kg', full: 'PELLET 200kg (3mm)' },
+    { key: 'b150', label: '150kg', full: 'B 타입 150kg' },
+    { key: 'b200', label: '200kg', full: 'B 타입 200kg' },
+    { key: 'b250', label: '250kg', full: 'B 타입 250kg' },
+    { key: 'g400', label: '400g', full: '1F 자동화 400g (19.2kg)' },
+    { key: 'g500', label: '500g', full: '1F 자동화 500g (21kg)' },
+    { key: 'g600', label: '600g', full: '1F 자동화 600g (21.6kg)' },
+    { key: 'k30a', label: '블럭', full: '30kg 블럭' },
+    { key: 'k30b', label: '8P', full: '30kg 조각 8P' }, 
+    { key: 'k30c', label: '16P', full: '30kg 조각 16P' }, 
+    { key: 'k20ap', label: '20kg(AP)', full: '20kg (AP)' }
 ];
 
 // 🚚 거래처 최신 데이터 개편
@@ -80,12 +80,14 @@ const FC_LEFT = [
     { id: 'fc_hwail', label: '화일상사', type: 'normal' }
 ];
 
+// 🚚 화일(빙그레) 아래에 화일상사를 깔끔하게 추가 확장
 const FC_RIGHT = [
     { id: 'fc_yongin', label: '용인드라이(D)', type: 'normal' }, 
     { id: 'fc_frame', label: '프레임', type: 'normal' },
     { id: 'fc_file', label: '세종(빙그레)', type: 'normal' }, 
     { id: 'fc_youngjae', label: '영재', type: 'normal' },
-    { id: 'fc_hwail_bing', label: '화일(빙그레)', type: 'normal' } 
+    { id: 'fc_hwail_bing', label: '화일(빙그레)', type: 'normal' },
+    { id: 'fc_hwail_sangsa', label: '화일상사', type: 'normal' }
 ];
 
 function parseCommaNum(str) {
@@ -198,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let html = '';
             if (ri === 0) {
-                html += `<td class="client-cell" rowspan="3">${client.name}</td>`;
+                html += `<td class="client-cell transition-all duration-300" id="client_cell_${ci}" rowspan="3">${client.name}</td>`;
             }
             html += `<td class="rowtype-cell">${rt.label}</td>`;
 
@@ -211,7 +213,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     const isOrder = rt.key === 'order';
                     const extraClass = isOrder ? 'qty-cell-order phase-1' : '';
-                    html += `<td><input type="text" inputmode="numeric" class="qty-cell sync-item qty-input ${extraClass}" id="c${ci}_k30a_${rt.key}" placeholder=""></td>`;
+                    const tooltipColor = isOrder ? 'border-sky-500/40 text-sky-400' : 'border-slate-600 text-slate-300';
+                    
+                    html += `<td class="p-0" style="overflow: visible !important;">
+                        <div class="relative group w-full h-full">
+                            <input type="text" inputmode="numeric" class="qty-cell sync-item qty-input ${extraClass}" id="c${ci}_k30a_${rt.key}" placeholder="">
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2.5 py-1 bg-slate-950/95 border ${tooltipColor} text-[11px] font-bold rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-30">
+                                30kg 블럭
+                            </div>
+                        </div>
+                    </td>`;
                 }
 
                 html += `<td colspan="3" class="no-prod-block">생산(X)</td>`;
@@ -222,7 +233,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         const isOrder = rt.key === 'order';
                         const extraClass = isOrder ? 'qty-cell-order phase-1' : '';
-                        html += `<td><input type="text" inputmode="numeric" class="qty-cell sync-item qty-input ${extraClass}" id="c${ci}_${p.key}_${rt.key}" placeholder=""></td>`;
+                        const tooltipColor = isOrder ? 'border-sky-500/40 text-sky-400' : 'border-slate-600 text-slate-300';
+                        
+                        html += `<td class="p-0" style="overflow: visible !important;">
+                            <div class="relative group w-full h-full">
+                                <input type="text" inputmode="numeric" class="qty-cell sync-item qty-input ${extraClass}" id="c${ci}_${p.key}_${rt.key}" placeholder="">
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2.5 py-1 bg-slate-950/95 border ${tooltipColor} text-[11px] font-bold rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.5)] opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-30">
+                                    ${p.full}
+                                </div>
+                            </div>
+                        </td>`;
                     }
                 });
             }
@@ -319,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </td>`;
         } else if (row.type === 'sejong') {
+            // 🍒 1. 세종상사 8P 수량 입력 인터페이스 및 데이터 연동 필드 추가 반영
             tr.innerHTML = `
                 <td class="font-bold w-28 text-center">${row.label}</td>
                 <td>
@@ -326,6 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="flex items-center gap-1 text-xs font-semibold text-slate-300 print:text-black">
                             <span>블록:</span>
                             <input type="text" id="fc_sejong_bl" class="fc-sub-input fc-qty-input sync-item text-center text-amber-300 font-bold" placeholder="">
+                            <span>개, 8P:</span>
+                            <input type="text" id="fc_sejong_8p" class="fc-sub-input fc-qty-input sync-item text-center text-amber-300 font-bold" placeholder="">
                             <span>개, 로스블록:</span>
                             <input type="text" id="fc_sejong_lbl" class="fc-sub-input fc-qty-input sync-item text-center text-amber-300 font-bold" placeholder="">
                             <span>개</span>
@@ -400,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // ── 자동 계산 엔진 ──
+    // ── 자동 계산 엔진 및 실시간 형광 모니터링 시스템 ──
     function recalcAll() {
         let grandOrderTotal = 0;
         const colOrderTotals = {};
@@ -408,8 +431,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         CLIENTS.forEach((client, ci) => {
             let rowOrderSum = 0, rowProdSum = 0;
+            let hasUnproduced = false;
 
             PRODUCTS.forEach(p => {
+                if (client.name === '빙그레(논산)' && p.key !== 'k30a') return;
+
                 const oInput = document.getElementById(`c${ci}_${p.key}_order`);
                 const pInput = document.getElementById(`c${ci}_${p.key}_prod`);
                 const uCell = document.getElementById(`c${ci}_${p.key}_unprod`);
@@ -423,12 +449,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 rowProdSum += pVal;
                 colOrderTotals[p.key] += oVal;
 
+                const unprodVal = oVal - pVal;
                 if (uCell) {
                     if (oRaw === '' && pRaw === '') {
                         uCell.textContent = '';
                     } else {
-                        uCell.textContent = (oVal - pVal).toLocaleString('ko-KR');
+                        uCell.textContent = unprodVal.toLocaleString('ko-KR');
                     }
+                }
+
+                if (unprodVal > 0) {
+                    hasUnproduced = true;
                 }
             });
 
@@ -438,6 +469,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById(`c${ci}_row_order_total`).textContent = formatCommaNum(rowOrderSum);
             document.getElementById(`c${ci}_row_prod_total`).textContent = formatCommaNum(rowProdSum);
             document.getElementById(`c${ci}_row_unprod_total`).textContent = formatCommaNum(rowUnprodSum);
+
+            const clientCell = document.getElementById(`client_cell_${ci}`);
+            if (clientCell) {
+                if (hasUnproduced) {
+                    clientCell.className = "client-cell !bg-lime-500/20 !text-lime-400 font-black border-2 border-lime-400/60 shadow-[0_0_15px_rgba(132,204,22,0.4)] transition-all duration-300";
+                } else {
+                    clientCell.className = "client-cell transition-all duration-300";
+                }
+            }
         });
 
         PRODUCTS.forEach(p => {
