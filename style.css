@@ -122,7 +122,7 @@ textarea { resize: none; }
 /* 상단 가상 스크롤바 */
 #top-scroll-wrapper { width: 100%; overflow-y: hidden; }
 
-/* 🍒 프린트 미디어 쿼리 최적화 (합계 행 & 미생산 수량 인쇄 정밀 보완) */
+/* 🍒 프린트 미디어 쿼리 최적화 (합계 행 & 익일 예상 물량 인쇄 정밀 보완) */
 @media print {
     @page { size: A4 portrait; margin: 5mm; } 
     body { background-color: #ffffff !important; color: #000000 !important; }
@@ -142,7 +142,6 @@ textarea { resize: none; }
 
     .dg-table { min-width: 0 !important; width: 100% !important; border: 1.5px solid #000000 !important; }
     
-    /* 기본 셀 테두리를 은근한 점선으로 처리하여 시각적 피로도 완화 */
     .dg-table th, .dg-table td { 
         border: 0.5px dashed #cbd5e1 !important; 
         padding: 2px 1px !important; 
@@ -164,7 +163,6 @@ textarea { resize: none; }
         background-color: #ffffff !important; 
     }
 
-    /* 거래처명 컬럼: 연회색 바탕 음영을 적용하여 그룹 단위 인지성 극대화 */
     .dg-table tbody td.client-cell { 
         background-color: #f1f5f9 !important; 
         font-weight: 800; 
@@ -176,11 +174,8 @@ textarea { resize: none; }
     
     .dg-table tbody tr.row-order { background-color: #ffffff !important; }
     .dg-table tbody tr.row-prod { background-color: #ffffff !important; }
-    
-    /* 🍒 미생산 행(row-unprod): 인쇄 시 배경에 은은한 옅은 회색 톤을 깔아 미생산 라인 식별력 강화 */
     .dg-table tbody tr.row-unprod { background-color: #fafafa !important; }
     
-    /* 🍒 미생산 수량 셀: 흑백 인쇄 시에도 확실히 눈에 띄도록 밑줄 강조 및 글자 두께 극대화 */
     .dg-table tbody td.unprod-cell { 
         font-size: 0.55rem !important; 
         color: #000000 !important; 
@@ -190,7 +185,6 @@ textarea { resize: none; }
 
     .dg-table tbody td.row-total-cell { background-color: #ffffff !important; font-weight: 800; }
 
-    /* 🍒 합계 행(tfoot): 3px 2중 테두리와 옅은 회색 음영(#e2e8f0)으로 인쇄물 맨 아래에 압도적 시각적 닻 부여 */
     .dg-table tfoot td { 
         background-color: #e2e8f0 !important; 
         border-top: 3px double #000000 !important; 
@@ -200,7 +194,6 @@ textarea { resize: none; }
         color: #000000 !important;
     }
 
-    /* 거래처 시작 행(client-start): 선명하고 고급스러운 3px 이중 실선 적용 */
     .dg-table tbody tr.client-start td { 
         border-top: 3px double #000000 !important; 
     }
@@ -210,7 +203,6 @@ textarea { resize: none; }
     .dg-table tbody tr.row-order .qty-cell,
     .dg-table tbody tr.row-prod .qty-cell { color: #000000 !important; }
     
-    /* 비고란 실제 입력창 인쇄 시 은닉 및 미러링 디브 표시 */
     .remark-cell textarea { display: none !important; }
 
     .print-remark-mirror {
@@ -225,12 +217,28 @@ textarea { resize: none; }
         background-color: #ffffff !important;
     }
 
-    /* 익일 예상 물량 인쇄 규격 */
-    .fc-table { border: 1px solid #000000 !important; }
+    /* 🍒 [핵심 수정] 익일 예상 물량 패널 인쇄 시 1컬럼 고정 및 페이지 찢어짐 방지 */
+    .fc-section-box {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        margin-top: 15px !important;
+    }
+
+    .fc-grid-container {
+        display: block !important; /* 인쇄 시 2열 그리드를 무조건 1열 수직 블록으로 고정 */
+        width: 100% !important;
+    }
+
+    .fc-table { 
+        border: 1px solid #000000 !important; 
+        width: 100% !important;
+        margin-bottom: -1px !important;
+    }
+
     .fc-table th, .fc-table td { 
         border: 1px solid #cbd5e1 !important; 
-        padding: 4px 6px !important; 
-        font-size: 0.65rem !important; 
+        padding: 3px 5px !important; 
+        font-size: 0.60rem !important; 
         background-color: #ffffff !important; 
         color: #000000 !important;
         white-space: nowrap !important; 
@@ -254,6 +262,13 @@ textarea { resize: none; }
 
     ::placeholder { color: transparent !important; }
 
-    .fc-note-box { background-color: #ffffff !important; border: 1px solid #000000 !important; color: #000000 !important; }
+    .fc-note-box { 
+        background-color: #ffffff !important; 
+        border: 1px solid #000000 !important; 
+        color: #000000 !important; 
+        font-size: 0.65rem !important;
+        padding: 4px 8px !important;
+    }
+
     .text-\[2\.2rem\] { font-size: 1.3rem !important; margin: 0 !important; line-height: 1; color: #000000 !important; }
 }

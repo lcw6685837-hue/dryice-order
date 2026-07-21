@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body class="p-4 lg:p-6 min-h-screen flex flex-col items-center">
 
@@ -77,7 +77,7 @@
                     </div>
                 </div>
 
-                <!-- 🚚 차량출고 네온 버튼 및 안내 툴팁 레이아웃 영역 -->
+                <!-- 🚚 차량출고 네온 버튼 영역 -->
                 <div class="flex items-center gap-4">
                     <div class="relative group no-print">
                         <a href="https://lcw6685837-hue.github.io/outbound_log/" 
@@ -87,10 +87,8 @@
                             <span>차량 출고</span>
                         </a>
                         
-                        <!-- 💡 마우스 호버 시 부드럽게 나타나는 슬림 네온 툴팁 팝업 -->
                         <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-950/95 border border-lime-400/40 text-lime-400 text-[11px] font-bold rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.6)] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-300 ease-out translate-y-1 group-hover:translate-y-0 z-30">
                             차량 출고 기록 사이트로 이동합니다
-                            <!-- 미세 화살표 격자 -->
                             <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-950/95"></div>
                         </div>
                     </div>
@@ -99,7 +97,7 @@
             </div>
         </div>
 
-        <!-- 🆕 상단 가상 스크롤바 -->
+        <!-- 상단 가상 스크롤바 -->
         <div id="top-scroll-wrapper" class="overflow-x-auto no-print mb-1.5" style="scrollbar-width: thin;">
             <div id="top-scroll-spacer" style="height: 1px;"></div>
         </div>
@@ -164,9 +162,10 @@
             </table>
         </div>
 
-        <div class="mt-6 rounded-xl border-[2px] border-slate-600 overflow-hidden print:border-none print:border-0">
+        <!-- 🍒 인쇄 제어 클래스 fc-section-box, fc-grid-container 적용 -->
+        <div class="fc-section-box mt-6 rounded-xl border-[2px] border-slate-600 overflow-hidden print:border-none print:border-0">
             <div class="bg-slate-800/80 text-center py-2 font-black tracking-widest text-lg print:bg-white print:text-black">익일 예상 물량</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-0 items-start">
+            <div class="fc-grid-container grid grid-cols-1 md:grid-cols-2 gap-0 items-start">
                 <table class="fc-table w-full border-collapse">
                     <tbody id="fc-left-body"></tbody>
                 </table>
