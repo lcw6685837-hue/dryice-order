@@ -122,7 +122,7 @@ textarea { resize: none; }
 /* 상단 가상 스크롤바 */
 #top-scroll-wrapper { width: 100%; overflow-y: hidden; }
 
-/* 🍒 프린트 미디어 쿼리 최적화 */
+/* 🍒 프린트 미디어 쿼리 최적화 (합계 행 & 미생산 수량 인쇄 정밀 보완) */
 @media print {
     @page { size: A4 portrait; margin: 5mm; } 
     body { background-color: #ffffff !important; color: #000000 !important; }
@@ -140,9 +140,11 @@ textarea { resize: none; }
     .no-print { display: none !important; }
     #top-scroll-wrapper { display: none !important; }
 
-    .dg-table { min-width: 0 !important; width: 100% !important; border: 1px solid #cbd5e1 !important; }
+    .dg-table { min-width: 0 !important; width: 100% !important; border: 1.5px solid #000000 !important; }
+    
+    /* 기본 셀 테두리를 은근한 점선으로 처리하여 시각적 피로도 완화 */
     .dg-table th, .dg-table td { 
-        border: 1px solid #cbd5e1 !important; 
+        border: 0.5px dashed #cbd5e1 !important; 
         padding: 2px 1px !important; 
         font-size: 0.52rem !important; 
         background-color: #ffffff !important; 
@@ -150,8 +152,8 @@ textarea { resize: none; }
         overflow: visible !important;   
     }
     
-    .dg-table thead th { background-color: #ffffff !important; font-weight: 900; }
-    .dg-table thead tr.sub-head th { background-color: #ffffff !important; font-size: 0.48rem !important; }
+    .dg-table thead th { background-color: #ffffff !important; font-weight: 900; border: 1px solid #000000 !important; }
+    .dg-table thead tr.sub-head th { background-color: #ffffff !important; font-size: 0.48rem !important; border: 1px solid #000000 !important; }
     .dg-table thead th.remark-header { font-size: 0.52rem !important; }
 
     .no-prod-block { 
@@ -162,33 +164,53 @@ textarea { resize: none; }
         background-color: #ffffff !important; 
     }
 
+    /* 거래처명 컬럼: 연회색 바탕 음영을 적용하여 그룹 단위 인지성 극대화 */
     .dg-table tbody td.client-cell { 
-        background-color: #ffffff !important; 
+        background-color: #f1f5f9 !important; 
         font-weight: 800; 
         font-size: 0.55rem !important; 
         line-height: 1.2;
+        border-right: 1.5px solid #000000 !important;
     }
     .dg-table tbody td.dest-cell { font-size: 0.48rem !important; background-color: #ffffff !important; }
     
     .dg-table tbody tr.row-order { background-color: #ffffff !important; }
     .dg-table tbody tr.row-prod { background-color: #ffffff !important; }
-    .dg-table tbody tr.row-unprod { background-color: #ffffff !important; }
-    .dg-table tbody td.row-total-cell { background-color: #ffffff !important; }
-    .dg-table tfoot td { background-color: #ffffff !important; border-top: 1px solid #cbd5e1 !important; }
+    
+    /* 🍒 미생산 행(row-unprod): 인쇄 시 배경에 은은한 옅은 회색 톤을 깔아 미생산 라인 식별력 강화 */
+    .dg-table tbody tr.row-unprod { background-color: #fafafa !important; }
+    
+    /* 🍒 미생산 수량 셀: 흑백 인쇄 시에도 확실히 눈에 띄도록 밑줄 강조 및 글자 두께 극대화 */
+    .dg-table tbody td.unprod-cell { 
+        font-size: 0.55rem !important; 
+        color: #000000 !important; 
+        font-weight: 900 !important;
+        text-decoration: underline !important;
+    }
 
-    .dg-table tbody tr.client-odd td.client-cell,
-    .dg-table tbody tr.client-odd td.dest-cell,
-    .dg-table tbody tr.client-odd td.remark-cell { background-color: #ffffff !important; }
-    .dg-table tbody tr.client-start td { border-top: 1px solid #cbd5e1 !important; }
+    .dg-table tbody td.row-total-cell { background-color: #ffffff !important; font-weight: 800; }
+
+    /* 🍒 합계 행(tfoot): 3px 2중 테두리와 옅은 회색 음영(#e2e8f0)으로 인쇄물 맨 아래에 압도적 시각적 닻 부여 */
+    .dg-table tfoot td { 
+        background-color: #e2e8f0 !important; 
+        border-top: 3px double #000000 !important; 
+        border-bottom: 3px double #000000 !important; 
+        font-weight: 900 !important;
+        font-size: 0.58rem !important;
+        color: #000000 !important;
+    }
+
+    /* 거래처 시작 행(client-start): 선명하고 고급스러운 3px 이중 실선 적용 */
+    .dg-table tbody tr.client-start td { 
+        border-top: 3px double #000000 !important; 
+    }
 
     .qty-cell { color: #000000 !important; font-size: 0.52rem !important; padding: 0 !important; background-color: #ffffff !important; }
     
     .dg-table tbody tr.row-order .qty-cell,
     .dg-table tbody tr.row-prod .qty-cell { color: #000000 !important; }
     
-    .dg-table tbody td.unprod-cell, .dg-table tbody td.row-total-cell, .dg-table tfoot td { font-size: 0.52rem !important; color: #000000 !important; }
-    
-    /* 🆕 비고란 실제 입력창 인쇄 시 완전 은닉 (이중 인쇄 원천 차단 복원) */
+    /* 비고란 실제 입력창 인쇄 시 은닉 및 미러링 디브 표시 */
     .remark-cell textarea { display: none !important; }
 
     .print-remark-mirror {
@@ -203,8 +225,8 @@ textarea { resize: none; }
         background-color: #ffffff !important;
     }
 
-    /* 익일 예상 물량 인쇄 시 가로선, 세로선 깨짐 및 자동 줄바꿈 원천 차단 */
-    .fc-table { border: 1px solid #cbd5e1 !important; }
+    /* 익일 예상 물량 인쇄 규격 */
+    .fc-table { border: 1px solid #000000 !important; }
     .fc-table th, .fc-table td { 
         border: 1px solid #cbd5e1 !important; 
         padding: 4px 6px !important; 
@@ -215,7 +237,6 @@ textarea { resize: none; }
         word-break: keep-all !important;
     }
     
-    /* 인쇄 시 입력 필드의 보더만 삭제하고, 물리적 너비는 칼같이 보존하도록 세팅 */
     .fc-sub-input {
         background-color: transparent !important;
         border: none !important;
@@ -227,13 +248,12 @@ textarea { resize: none; }
         display: inline-block !important; 
     }
 
-    /* 인쇄 목적에 최적화된 용도별 픽셀 너비 락인 규격 */
     .fc-qty-input { width: 35px !important; }  
     .fc-time-input { width: 62px !important; } 
     .fc-note-input { width: 140px !important; } 
 
     ::placeholder { color: transparent !important; }
 
-    .fc-note-box { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; color: #000000 !important; }
+    .fc-note-box { background-color: #ffffff !important; border: 1px solid #000000 !important; color: #000000 !important; }
     .text-\[2\.2rem\] { font-size: 1.3rem !important; margin: 0 !important; line-height: 1; color: #000000 !important; }
 }

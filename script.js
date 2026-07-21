@@ -45,7 +45,7 @@ const PRODUCTS = [
     { key: 'k20ap', label: '20kg(AP)', full: '20kg (AP)' }
 ];
 
-// 🚚 거래처 최신 데이터 개편
+// 🚚 거래처 마스터 데이터 개편 (용인드라이(대상) 아래 용인드라이(D) 반영)
 const CLIENTS = [
     { name: '화일공항', dest: '공항' },
     { name: '화일경보', dest: '공항' },
@@ -56,6 +56,7 @@ const CLIENTS = [
     { name: '한국콜드체인', dest: '이천' }, 
     { name: '경기남부', dest: '평택' }, 
     { name: '용인드라이(대상)', dest: '서산' }, 
+    { name: '용인드라이(D)', dest: '서산' },
     { name: '엠엔엠', dest: '서산' },
     { name: '프레임', dest: '서울' },
     { name: '세종상사', dest: '이천' },
@@ -68,7 +69,7 @@ const ROW_TYPES = [
     { key: 'unprod', label: '미생산', cls: 'row-unprod' }
 ];
 
-// 익일 예상 물량 데이터셋에 템플릿 타입을 매핑하여 데이터 구조 파편화 방지
+// 익일 예상 물량 데이터셋 좌측 패널
 const FC_LEFT = [
     { id: 'fc_export', label: '수출', special: true },
     { id: 'fc_airport', label: '공항', type: 'airport' },
@@ -80,9 +81,10 @@ const FC_LEFT = [
     { id: 'fc_hwail', label: '화일상사', type: 'normal' }
 ];
 
-// 🚚 화일(빙그레) 아래에 화일상사를 깔끔하게 추가 확장
+// 익일 예상 물량 데이터셋 우측 패널
 const FC_RIGHT = [
     { id: 'fc_yongin', label: '용인드라이(D)', type: 'normal' }, 
+    { id: 'fc_yongin_daesang', label: '용인드라이(대상)', type: 'normal' },
     { id: 'fc_frame', label: '프레임', type: 'normal' },
     { id: 'fc_file', label: '세종(빙그레)', type: 'normal' }, 
     { id: 'fc_youngjae', label: '영재', type: 'normal' },
@@ -276,13 +278,13 @@ document.addEventListener('DOMContentLoaded', () => {
     emptyTd.colSpan = 2;
     totalRow.appendChild(emptyTd);
 
-    // ── 익일 예상 물량 표 생성 ──
+    // ── 익일 예상 물량 표 생성 (너비 확장 및 줄바꿈 강제 차단 반영) ──
     const fcLeftBody = document.getElementById('fc-left-body');
     FC_LEFT.forEach(row => {
         const tr = document.createElement('tr');
         if (row.special) {
             tr.innerHTML = `
-                <td class="font-bold w-28 align-top py-2" rowspan="1">${row.label}</td>
+                <td class="font-bold w-32 whitespace-nowrap align-top py-2 text-center" rowspan="1">${row.label}</td>
                 <td class="text-left text-xs leading-6 py-1">
                     <div class="flex flex-col gap-2 p-1">
                         <div class="flex items-center gap-2">
@@ -298,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </td>`;
         } else if (row.type === 'airport') {
             tr.innerHTML = `
-                <td class="font-bold w-28 text-center">${row.label}</td>
+                <td class="font-bold w-32 whitespace-nowrap text-center">${row.label}</td>
                 <td>
                     <div class="flex items-center justify-between w-full gap-2 px-1">
                         <div class="flex items-center gap-1 text-xs font-semibold text-slate-300 print:text-black">
@@ -319,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </td>`;
         } else if (row.type === 'gyeongbo') {
             tr.innerHTML = `
-                <td class="font-bold w-28 text-center">${row.label}</td>
+                <td class="font-bold w-32 whitespace-nowrap text-center">${row.label}</td>
                 <td>
                     <div class="flex items-center justify-between w-full gap-2 px-1">
                         <div class="flex items-center gap-1 text-xs font-semibold text-slate-300 print:text-black">
@@ -339,9 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </td>`;
         } else if (row.type === 'sejong') {
-            // 🍒 1. 세종상사 8P 수량 입력 인터페이스 및 데이터 연동 필드 추가 반영
             tr.innerHTML = `
-                <td class="font-bold w-28 text-center">${row.label}</td>
+                <td class="font-bold w-32 whitespace-nowrap text-center">${row.label}</td>
                 <td>
                     <div class="flex items-center justify-between w-full gap-2 px-1">
                         <div class="flex items-center gap-1 text-xs font-semibold text-slate-300 print:text-black">
@@ -364,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </td>`;
         } else {
             tr.innerHTML = `
-                <td class="font-bold w-28 text-center">${row.label}</td>
+                <td class="font-bold w-32 whitespace-nowrap text-center">${row.label}</td>
                 <td>
                     <div class="flex items-center justify-between w-full gap-2 px-1">
                         <input type="text" id="${row.id}_note" class="fc-sub-input fc-note-input sync-item flex-1 bg-transparent border-none outline-none text-[#fde68a] font-bold py-1" placeholder="">
@@ -384,8 +385,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const fcRightBody = document.getElementById('fc-right-body');
     FC_RIGHT.forEach(row => {
         const tr = document.createElement('tr');
+        // 🍒 '용인드라이(대상)' 등 길어진 거래처명이 한 줄로 명확하게 고정되도록 w-32 및 whitespace-nowrap 정격 주입
         tr.innerHTML = `
-            <td class="font-bold w-28 text-center">${row.label}</td>
+            <td class="font-bold w-32 whitespace-nowrap text-center">${row.label}</td>
             <td>
                 <div class="flex items-center justify-between w-full gap-2 px-1">
                     <input type="text" id="${row.id}_note" class="fc-sub-input fc-note-input sync-item flex-1 bg-transparent border-none outline-none text-[#fde68a] font-bold py-1" placeholder="">
