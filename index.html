@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body class="p-4 lg:p-6 min-h-screen flex flex-col items-center">
 
@@ -179,9 +179,9 @@
         </div>
     </div>
 
-    <!-- 🚨 D/I 주문 접수 대형 현장 알림 팝업 모달 -->
-    <div id="order-alert-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 no-print transition-all duration-300">
-        <div class="bg-slate-900 border-4 border-amber-500 rounded-3xl p-8 max-w-2xl w-full text-center shadow-[0_0_60px_rgba(245,158,11,0.6)] transform transition-all">
+    <!-- 🚨 D/I 주문 접수 대형 현장 알림 팝업 모달 (대시보드가 투명하게 비쳐 보이도록 배경 오버레이 교정) -->
+    <div id="order-alert-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/40 backdrop-blur-[2px] p-4 no-print transition-all duration-300">
+        <div class="bg-slate-900/95 border-4 border-amber-500 rounded-3xl p-8 max-w-2xl w-full text-center shadow-[0_0_60px_rgba(245,158,11,0.6)] transform transition-all">
             <div class="mb-4 inline-flex items-center justify-center w-20 h-20 bg-amber-500/20 text-amber-400 rounded-full border-2 border-amber-400/50 animate-bounce">
                 <i class="fas fa-bell text-4xl"></i>
             </div>
@@ -197,6 +197,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=9"></script>
+    <script src="script.js?v=10"></script>
 </body>
 </html>
