@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body class="p-4 lg:p-6 min-h-screen flex flex-col items-center">
 
@@ -162,7 +162,7 @@
             </table>
         </div>
 
-        <!-- 🍒 인쇄 제어 클래스 fc-section-box, fc-grid-container 적용 -->
+        <!-- 익일 예상 물량 영역 -->
         <div class="fc-section-box mt-6 rounded-xl border-[2px] border-slate-600 overflow-hidden print:border-none print:border-0">
             <div class="bg-slate-800/80 text-center py-2 font-black tracking-widest text-lg print:bg-white print:text-black">익일 예상 물량</div>
             <div class="fc-grid-container grid grid-cols-1 md:grid-cols-2 gap-0 items-start">
@@ -179,6 +179,24 @@
         </div>
     </div>
 
-    <script src="script.js?v=5"></script>
+    <!-- 🚨 D/I 주문 접수 대형 현장 알림 팝업 모달 -->
+    <div id="order-alert-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 no-print transition-all duration-300">
+        <div class="bg-slate-900 border-4 border-amber-500 rounded-3xl p-8 max-w-2xl w-full text-center shadow-[0_0_60px_rgba(245,158,11,0.6)] transform transition-all">
+            <div class="mb-4 inline-flex items-center justify-center w-20 h-20 bg-amber-500/20 text-amber-400 rounded-full border-2 border-amber-400/50 animate-bounce">
+                <i class="fas fa-bell text-4xl"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-black text-white leading-relaxed mb-6 tracking-wide">
+                D/I 주문요청이 접수되었습니다.<br>
+                <span class="text-amber-400 text-3xl md:text-4xl underline decoration-rose-500 decoration-4">주문수량</span>을 꼭 
+                <span class="text-rose-500 text-3xl md:text-4xl font-black">확인</span>하시고,<br>
+                아래의 확인버튼을 누르면 팝업창이 사라집니다.
+            </h2>
+            <button onclick="closeOrderAlert()" class="mt-4 px-12 py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-2xl font-black rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.8)] active:scale-95 transition-all duration-200 cursor-pointer tracking-widest">
+                확 인 (완료)
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js?v=9"></script>
 </body>
 </html>

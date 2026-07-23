@@ -122,7 +122,7 @@ textarea { resize: none; }
 /* 상단 가상 스크롤바 */
 #top-scroll-wrapper { width: 100%; overflow-y: hidden; }
 
-/* 🍒 프린트 미디어 쿼리 최적화 (합계 행 & 익일 예상 물량 인쇄 정밀 보완) */
+/* 🍒 프린트 미디어 쿼리 최적화 */
 @media print {
     @page { size: A4 portrait; margin: 5mm; } 
     body { background-color: #ffffff !important; color: #000000 !important; }
@@ -137,7 +137,7 @@ textarea { resize: none; }
         background: #ffffff !important;
     }
 
-    .no-print { display: none !important; }
+    .no-print, #order-alert-modal { display: none !important; }
     #top-scroll-wrapper { display: none !important; }
 
     .dg-table { min-width: 0 !important; width: 100% !important; border: 1.5px solid #000000 !important; }
@@ -217,7 +217,6 @@ textarea { resize: none; }
         background-color: #ffffff !important;
     }
 
-    /* 🍒 [핵심 수정] 익일 예상 물량 패널 인쇄 시 1컬럼 고정 및 페이지 찢어짐 방지 */
     .fc-section-box {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
@@ -225,7 +224,7 @@ textarea { resize: none; }
     }
 
     .fc-grid-container {
-        display: block !important; /* 인쇄 시 2열 그리드를 무조건 1열 수직 블록으로 고정 */
+        display: block !important;
         width: 100% !important;
     }
 
