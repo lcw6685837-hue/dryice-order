@@ -13,13 +13,13 @@ textarea { resize: none; }
 .dg-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1700px; }
 .dg-table th, .dg-table td { border: 1px solid #334155; padding: 3px 4px; text-align: center; font-size: 0.78rem; overflow: hidden; }
 
-/* 너비 배정 */
+/* 🍒 [컬럼 폭 재배치] 도착지 폭 2% -> 3.5% 확장 (비고 폭 23% -> 21.5% 미세 할양) */
 .col-client { width: 9%; }   
 .col-type { width: 5%; }     
 .col-qty { width: 4.7%; }    
 .col-total { width: 4.6%; }  
-.col-dest { width: 2%; }     
-.col-remark { width: 23%; }  
+.col-dest { width: 3.5%; }     
+.col-remark { width: 21.5%; }  
 
 .dg-table thead th { background-color: rgba(30, 41, 59, 0.85); color: #cbd5e1; font-weight: 800; letter-spacing: 0.02em; text-align: center !important; }
 .dg-table thead tr.sub-head th { background-color: rgba(30, 41, 59, 0.55); font-size: 0.72rem; }
@@ -30,8 +30,8 @@ textarea { resize: none; }
 .dg-table tbody td.client-cell { color: #f1f5f9; font-weight: 700; font-size: 0.82rem; }
 .dg-table tbody td.rowtype-cell { color: #94a3b8; font-weight: 600; font-size: 0.7rem; white-space: nowrap; }
 
-/* 도착지 셀 글자 크기 보존 */
-.dg-table tbody td.dest-cell { color: #cbd5e1; font-weight: 700; font-size: 0.78rem; }
+/* 도착지 셀 글자 크기 및 안전 여백 보존 */
+.dg-table tbody td.dest-cell { color: #cbd5e1; font-weight: 700; font-size: 0.78rem; white-space: nowrap; }
 
 /* 🔵 주문수량 행: 블루 테마 */
 .dg-table tbody tr.row-order { background-color: rgba(56, 189, 248, 0.10); }
@@ -122,7 +122,7 @@ textarea { resize: none; }
 /* 상단 가상 스크롤바 */
 #top-scroll-wrapper { width: 100%; overflow-y: hidden; }
 
-/* 🍒 프린트 미디어 쿼리 최적화 */
+/* 🍒 프린트 미디어 쿼리 정밀 최적화 (도착지 글자 간섭 완벽 차단 + 인쇄 수량 글자 크기 유지) */
 @media print {
     @page { size: A4 portrait; margin: 5mm; } 
     body { background-color: #ffffff !important; color: #000000 !important; }
@@ -144,7 +144,7 @@ textarea { resize: none; }
     
     .dg-table th, .dg-table td { 
         border: 0.5px dashed #cbd5e1 !important; 
-        padding: 2px 1px !important; 
+        padding: 1px 1px !important; 
         font-size: 0.52rem !important; 
         background-color: #ffffff !important; 
         word-break: keep-all !important; 
@@ -170,38 +170,53 @@ textarea { resize: none; }
         line-height: 1.2;
         border-right: 1.5px solid #000000 !important;
     }
-    .dg-table tbody td.dest-cell { font-size: 0.48rem !important; background-color: #ffffff !important; }
     
-    .dg-table tbody tr.row-order { background-color: #ffffff !important; }
-    .dg-table tbody tr.row-prod { background-color: #ffffff !important; }
-    .dg-table tbody tr.row-unprod { background-color: #fafafa !important; }
+    /* 🍒 인쇄 시 도착지 글자가 세로선에 간섭받지 않도록 여백 및 줄바꿈 금지(nowrap) 지정 */
+    .dg-table tbody td.dest-cell { 
+        font-size: 0.52rem !important; 
+        background-color: #ffffff !important; 
+        font-weight: 800 !important;
+        white-space: nowrap !important;
+        padding: 1px 2px !important;
+    }
     
+    .qty-cell { 
+        color: #000000 !important; 
+        font-size: 0.88rem !important; 
+        font-weight: 900 !important; 
+        padding: 0 !important; 
+        background-color: #ffffff !important; 
+        line-height: 1.1 !important;
+    }
+    
+    .dg-table tbody tr.row-order .qty-cell,
+    .dg-table tbody tr.row-prod .qty-cell { color: #000000 !important; }
+
     .dg-table tbody td.unprod-cell { 
-        font-size: 0.55rem !important; 
+        font-size: 0.88rem !important; 
         color: #000000 !important; 
         font-weight: 900 !important;
         text-decoration: underline !important;
     }
 
-    .dg-table tbody td.row-total-cell { background-color: #ffffff !important; font-weight: 800; }
+    .dg-table tbody td.row-total-cell { 
+        background-color: #ffffff !important; 
+        font-weight: 900 !important; 
+        font-size: 0.88rem !important;
+    }
 
     .dg-table tfoot td { 
         background-color: #e2e8f0 !important; 
         border-top: 3px double #000000 !important; 
         border-bottom: 3px double #000000 !important; 
         font-weight: 900 !important;
-        font-size: 0.58rem !important;
+        font-size: 0.85rem !important;
         color: #000000 !important;
     }
 
     .dg-table tbody tr.client-start td { 
         border-top: 3px double #000000 !important; 
     }
-
-    .qty-cell { color: #000000 !important; font-size: 0.52rem !important; padding: 0 !important; background-color: #ffffff !important; }
-    
-    .dg-table tbody tr.row-order .qty-cell,
-    .dg-table tbody tr.row-prod .qty-cell { color: #000000 !important; }
     
     .remark-cell textarea { display: none !important; }
 

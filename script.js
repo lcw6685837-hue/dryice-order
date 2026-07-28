@@ -33,13 +33,12 @@ let currentGlobalPhase = '1';
 let isInitialLoad = true;
 let previousOrders = {};
 let pendingOrderAlert = false;
-let pendingChangedClients = new Set(); // 주문이 변경된 거래처 목록 집합
+let pendingChangedClients = new Set(); 
 
 function showOrderAlert() {
     const modal = document.getElementById('order-alert-modal');
     const tagsContainer = document.getElementById('alert-client-tags');
 
-    // 🍒 캡틴의 디스플레이 구상안(image_afad79.png)을 동적 네온 버튼 태그로 구현
     if (tagsContainer) {
         if (pendingChangedClients.size > 0) {
             tagsContainer.innerHTML = Array.from(pendingChangedClients).map(clientName => 
@@ -62,7 +61,6 @@ function closeOrderAlert() {
     if (modal) {
         modal.classList.add('hidden');
     }
-    // 확인 완료 시 추적된 거래처 목록 초기화
     pendingChangedClients.clear();
 }
 
@@ -160,10 +158,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const dayDisplay = document.getElementById('log-day');
     const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
 
+    // 🖨️ 화면용 날짜 표시 및 인쇄용 날짜 미러링 동시 업데이트 함수
     function updateDayDisplay(dateStr) {
         const dateObj = new Date(dateStr);
         if (!isNaN(dateObj)) {
-            dayDisplay.textContent = daysOfWeek[dateObj.getDay()] + '요일';
+            const dayName = daysOfWeek[dateObj.getDay()] + '요일';
+            dayDisplay.textContent = dayName;
+
+            const printDateEl = document.getElementById('print-log-date');
+            const printDayEl = document.getElementById('print-log-day');
+            if (printDateEl) printDateEl.textContent = dateStr;
+            if (printDayEl) printDayEl.textContent = dayName;
         }
     }
 
@@ -691,14 +696,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     item.value = (dbValue === null || dbValue === undefined || dbValue === 'null') ? '' : dbValue;
                 }
 
-                // 🍒 오직 '주문수량(_order)' 변동 시에만 팝업 감지 및 거래처 추출
                 if (item.id.endsWith('_order')) {
                     const currentVal = data[item.id] || '';
                     
                     if (!isInitialLoad && previousOrders[item.id] !== undefined && previousOrders[item.id] !== currentVal && currentVal !== '') {
                         hasOrderChanged = true;
 
-                        // 셀 ID(c{ci}_{p.key}_order)로부터 거래처 인덱스 추출 후 거래처명 등록
                         const match = item.id.match(/^c(\d+)_/);
                         if (match) {
                             const ci = parseInt(match[1], 10);
