@@ -124,9 +124,9 @@ textarea { resize: none; }
 /* 상단 가상 스크롤바 */
 #top-scroll-wrapper { width: 100%; overflow-y: hidden; }
 
-/* 🍒 프린트 미디어 쿼리 정밀 최적화 (인쇄 시 모든 주문수량 셀의 칠흑 같은 100% Solid Black 출력 보장) */
+/* 🍒 프린트 미디어 쿼리 정밀 최적화 (주문수량 100% Solid Black vs 생산량/미생산 50% 연한 회색 명도 분리) */
 @media print {
-    @page { size: A4 portrait; margin: 5mm; } 
+    @page { size: A4 portrait; margin: 16mm 5mm 5mm 5mm; } 
     body { background-color: #ffffff !important; color: #000000 !important; }
 
     * {
@@ -140,7 +140,7 @@ textarea { resize: none; }
     }
 
     .no-print, #order-alert-modal { display: none !important; }
-    top-scroll-wrapper { display: none !important; }
+    #top-scroll-wrapper { display: none !important; }
 
     /* 주문 수량이 0인 거래처 행들은 인쇄 시 출력을 감춤 */
     tr.print-no-order {
@@ -151,21 +151,22 @@ textarea { resize: none; }
     
     .dg-table th, .dg-table td { 
         border: 0.5px dashed #cbd5e1 !important; 
-        padding: 1px 1px !important; 
-        font-size: 0.52rem !important; 
+        padding: 0.5px 1px !important; 
+        font-size: 0.50rem !important; 
         background-color: #ffffff !important; 
         word-break: keep-all !important; 
         overflow: visible !important;   
     }
     
     .dg-table thead th { background-color: #ffffff !important; font-weight: 900; border: 1px solid #000000 !important; }
-    .dg-table thead tr.sub-head th { background-color: #ffffff !important; font-size: 0.48rem !important; border: 1px solid #000000 !important; }
-    .dg-table thead th.remark-header { font-size: 0.52rem !important; }
+    .dg-table thead tr.sub-head th { background-color: #ffffff !important; font-size: 0.46rem !important; border: 1px solid #000000 !important; }
+    .dg-table thead th.remark-header { font-size: 0.50rem !important; }
 
     .no-prod-block { 
-        color: #dc2626 !important; 
-        font-weight: 800 !important; 
-        font-size: 0.52rem !important; 
+        color: #999999 !important; 
+        -webkit-text-fill-color: #999999 !important;
+        font-weight: 600 !important; 
+        font-size: 0.50rem !important; 
         text-align: center !important; 
         background-color: #ffffff !important; 
     }
@@ -173,55 +174,54 @@ textarea { resize: none; }
     .dg-table tbody td.client-cell { 
         background-color: #f1f5f9 !important; 
         font-weight: 800; 
-        font-size: 0.55rem !important; 
-        line-height: 1.2;
+        font-size: 0.52rem !important; 
+        line-height: 1.15;
         border-right: 1.5px solid #000000 !important;
     }
     
     .dg-table tbody td.dest-cell { 
-        font-size: 0.52rem !important; 
+        font-size: 0.50rem !important; 
         background-color: #ffffff !important; 
         font-weight: 800 !important;
         white-space: nowrap !important;
-        padding: 1px 2px !important;
+        padding: 0.5px 1px !important;
     }
     
     .qty-cell { 
-        color: #000000 !important; 
-        -webkit-text-fill-color: #000000 !important;
-        font-size: 0.88rem !important; 
-        font-weight: 900 !important; 
+        font-size: 0.82rem !important; 
         padding: 0 !important; 
         background-color: #ffffff !important; 
-        line-height: 1.1 !important;
+        line-height: 1.05 !important;
     }
     
-    /* 🍒 [피드백 핵심 개편] 인쇄 시 차수별 색상(phase-1~4) 선택자 점수를 완벽히 압도하여 생산량과 동일하게 칠흑 같은 100% 흑색 출력 */
+    /* 🍒 1. 핵심 데이터 [주문수량]: 칠흑 같은 100% Solid Black (#000000, Font-Weight 900) 강제 */
     .dg-table tbody tr.row-order .qty-cell,
     .dg-table tbody tr.row-order .qty-cell.phase-1,
     .dg-table tbody tr.row-order .qty-cell.phase-2,
     .dg-table tbody tr.row-order .qty-cell.phase-3,
     .dg-table tbody tr.row-order .qty-cell.phase-4,
-    .dg-table tbody tr.row-prod .qty-cell { 
+    .dg-table tbody tr.row-order .row-total-cell { 
         color: #000000 !important; 
         -webkit-text-fill-color: #000000 !important;
         font-weight: 900 !important;
     }
 
-    .dg-table tbody td.unprod-cell { 
-        font-size: 0.88rem !important; 
-        color: #000000 !important; 
-        -webkit-text-fill-color: #000000 !important;
-        font-weight: 900 !important;
+    /* 🍒 2. 보조 데이터 [생산량]: 인쇄 농도 50% 감쇄 중성 회색 (#666666, Font-Weight 600) 강제 */
+    .dg-table tbody tr.row-prod .qty-cell,
+    .dg-table tbody tr.row-prod .row-total-cell { 
+        color: #666666 !important; 
+        -webkit-text-fill-color: #666666 !important;
+        font-weight: 600 !important;
+    }
+
+    /* 🍒 3. 보조 데이터 [미생산]: 인쇄 농도 50% 감쇄 중성 회색 (#666666, Font-Weight 600) 강제 */
+    .dg-table tbody td.unprod-cell,
+    .dg-table tbody tr.row-unprod .row-total-cell { 
+        font-size: 0.82rem !important; 
+        color: #666666 !important; 
+        -webkit-text-fill-color: #666666 !important;
+        font-weight: 600 !important;
         text-decoration: underline !important;
-    }
-
-    .dg-table tbody td.row-total-cell { 
-        background-color: #ffffff !important; 
-        font-weight: 900 !important; 
-        font-size: 0.88rem !important;
-        color: #000000 !important;
-        -webkit-text-fill-color: #000000 !important;
     }
 
     .dg-table tfoot td { 
@@ -229,7 +229,7 @@ textarea { resize: none; }
         border-top: 3px double #000000 !important; 
         border-bottom: 3px double #000000 !important; 
         font-weight: 900 !important;
-        font-size: 0.85rem !important;
+        font-size: 0.80rem !important;
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
     }
@@ -244,19 +244,19 @@ textarea { resize: none; }
         display: block !important;
         white-space: pre-wrap; 
         text-align: left;
-        font-size: 0.52rem !important; 
-        line-height: 1.4;
+        font-size: 0.50rem !important; 
+        line-height: 1.3;
         word-break: break-all;
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
-        padding: 2px 4px !important;
+        padding: 1px 3px !important;
         background-color: #ffffff !important;
     }
 
     .fc-section-box {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
-        margin-top: 15px !important;
+        margin-top: 8px !important;
     }
 
     .fc-grid-container {
@@ -272,8 +272,8 @@ textarea { resize: none; }
 
     .fc-table th, .fc-table td { 
         border: 1px solid #cbd5e1 !important; 
-        padding: 3px 5px !important; 
-        font-size: 0.60rem !important; 
+        padding: 2px 4px !important; 
+        font-size: 0.58rem !important; 
         background-color: #ffffff !important; 
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
@@ -293,9 +293,9 @@ textarea { resize: none; }
         display: inline-block !important; 
     }
 
-    .fc-qty-input { width: 35px !important; }  
-    .fc-time-input { width: 62px !important; } 
-    .fc-note-input { width: 140px !important; } 
+    .fc-qty-input { width: 32px !important; }  
+    .fc-time-input { width: 58px !important; } 
+    .fc-note-input { width: 130px !important; } 
 
     ::placeholder { color: transparent !important; }
 
@@ -304,9 +304,9 @@ textarea { resize: none; }
         border: 1px solid #000000 !important; 
         color: #000000 !important; 
         -webkit-text-fill-color: #000000 !important;
-        font-size: 0.65rem !important;
-        padding: 4px 8px !important;
+        font-size: 0.60rem !important;
+        padding: 3px 6px !important;
     }
 
-    .text-\[2\.2rem\] { font-size: 1.3rem !important; margin: 0 !important; line-height: 1; color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
+    .text-\[2\.2rem\] { font-size: 1.25rem !important; margin: 0 !important; line-height: 1; color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
 }
