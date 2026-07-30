@@ -13,7 +13,7 @@ textarea { resize: none; }
 .dg-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1700px; }
 .dg-table th, .dg-table td { border: 1px solid #334155; padding: 3px 4px; text-align: center; font-size: 0.78rem; overflow: hidden; }
 
-/* 🍒 [컬럼 폭 재배치] 도착지 폭 2% -> 3.5% 확장 (비고 폭 23% -> 21.5% 미세 할양) */
+/* 컬럼 폭 배정 */
 .col-client { width: 9%; }   
 .col-type { width: 5%; }     
 .col-qty { width: 4.7%; }    
@@ -30,17 +30,19 @@ textarea { resize: none; }
 .dg-table tbody td.client-cell { color: #f1f5f9; font-weight: 700; font-size: 0.82rem; }
 .dg-table tbody td.rowtype-cell { color: #94a3b8; font-weight: 600; font-size: 0.7rem; white-space: nowrap; }
 
-/* 도착지 셀 글자 크기 및 안전 여백 보존 */
+/* 도착지 셀 글자 크기 보존 */
 .dg-table tbody td.dest-cell { color: #cbd5e1; font-weight: 700; font-size: 0.78rem; white-space: nowrap; }
 
 /* 🔵 주문수량 행: 블루 테마 */
 .dg-table tbody tr.row-order { background-color: rgba(56, 189, 248, 0.10); }
 
-/* 개별 셀 단위 실시간 주문수량 차수별 글자색 지정 */
+/* 개별 셀 단위 실시간 주문수량 차수별 글자색 지정 (화면 전용) */
 .dg-table tbody tr.row-order .qty-cell.phase-1 { color: #38bdf8 !important; } 
 .dg-table tbody tr.row-order .qty-cell.phase-2 { color: #f87171 !important; } 
 .dg-table tbody tr.row-order .qty-cell.phase-3 { color: #4ade80 !important; } 
-.dg-table tbody tr.row-order .qty-cell.phase-4 { color: #facc15 !important; } 
+
+/* '확정' 차수(phase-4) 수량 글자색: 생산량 셀과 동일한 선명한 화이트(#ffffff) */
+.dg-table tbody tr.row-order .qty-cell.phase-4 { color: #ffffff !important; font-weight: 700 !important; } 
 
 /* 🟢 생산량 행 */
 .dg-table tbody tr.row-prod { background-color: rgba(255, 255, 255, 0.04); }
@@ -78,7 +80,7 @@ textarea { resize: none; }
 .fc-input { background: transparent; border: none; outline: none; color: #fde68a; font-weight: 700; text-align: left; width: 100%; font-size: 1.3rem; padding: 2px 6px; }
 .fc-input:focus { background-color: rgba(59, 130, 246, 0.15); }
 
-/* 익일 예상 물량 테이블 격자 구분선 및 디자인 대대적 강화 */
+/* 익일 예상 물량 테이블 격자 구분선 및 디자인 강화 */
 .fc-table {
     width: 100%;
     border-collapse: collapse;
@@ -122,7 +124,7 @@ textarea { resize: none; }
 /* 상단 가상 스크롤바 */
 #top-scroll-wrapper { width: 100%; overflow-y: hidden; }
 
-/* 🍒 프린트 미디어 쿼리 정밀 최적화 (도착지 글자 간섭 완벽 차단 + 인쇄 수량 글자 크기 유지) */
+/* 🍒 프린트 미디어 쿼리 정밀 최적화 (인쇄 시 모든 주문수량 셀의 칠흑 같은 100% Solid Black 출력 보장) */
 @media print {
     @page { size: A4 portrait; margin: 5mm; } 
     body { background-color: #ffffff !important; color: #000000 !important; }
@@ -138,7 +140,12 @@ textarea { resize: none; }
     }
 
     .no-print, #order-alert-modal { display: none !important; }
-    #top-scroll-wrapper { display: none !important; }
+    top-scroll-wrapper { display: none !important; }
+
+    /* 주문 수량이 0인 거래처 행들은 인쇄 시 출력을 감춤 */
+    tr.print-no-order {
+        display: none !important;
+    }
 
     .dg-table { min-width: 0 !important; width: 100% !important; border: 1.5px solid #000000 !important; }
     
@@ -171,7 +178,6 @@ textarea { resize: none; }
         border-right: 1.5px solid #000000 !important;
     }
     
-    /* 🍒 인쇄 시 도착지 글자가 세로선에 간섭받지 않도록 여백 및 줄바꿈 금지(nowrap) 지정 */
     .dg-table tbody td.dest-cell { 
         font-size: 0.52rem !important; 
         background-color: #ffffff !important; 
@@ -182,6 +188,7 @@ textarea { resize: none; }
     
     .qty-cell { 
         color: #000000 !important; 
+        -webkit-text-fill-color: #000000 !important;
         font-size: 0.88rem !important; 
         font-weight: 900 !important; 
         padding: 0 !important; 
@@ -189,12 +196,22 @@ textarea { resize: none; }
         line-height: 1.1 !important;
     }
     
+    /* 🍒 [피드백 핵심 개편] 인쇄 시 차수별 색상(phase-1~4) 선택자 점수를 완벽히 압도하여 생산량과 동일하게 칠흑 같은 100% 흑색 출력 */
     .dg-table tbody tr.row-order .qty-cell,
-    .dg-table tbody tr.row-prod .qty-cell { color: #000000 !important; }
+    .dg-table tbody tr.row-order .qty-cell.phase-1,
+    .dg-table tbody tr.row-order .qty-cell.phase-2,
+    .dg-table tbody tr.row-order .qty-cell.phase-3,
+    .dg-table tbody tr.row-order .qty-cell.phase-4,
+    .dg-table tbody tr.row-prod .qty-cell { 
+        color: #000000 !important; 
+        -webkit-text-fill-color: #000000 !important;
+        font-weight: 900 !important;
+    }
 
     .dg-table tbody td.unprod-cell { 
         font-size: 0.88rem !important; 
         color: #000000 !important; 
+        -webkit-text-fill-color: #000000 !important;
         font-weight: 900 !important;
         text-decoration: underline !important;
     }
@@ -203,6 +220,8 @@ textarea { resize: none; }
         background-color: #ffffff !important; 
         font-weight: 900 !important; 
         font-size: 0.88rem !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
     }
 
     .dg-table tfoot td { 
@@ -212,6 +231,7 @@ textarea { resize: none; }
         font-weight: 900 !important;
         font-size: 0.85rem !important;
         color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
     }
 
     .dg-table tbody tr.client-start td { 
@@ -228,6 +248,7 @@ textarea { resize: none; }
         line-height: 1.4;
         word-break: break-all;
         color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
         padding: 2px 4px !important;
         background-color: #ffffff !important;
     }
@@ -255,6 +276,7 @@ textarea { resize: none; }
         font-size: 0.60rem !important; 
         background-color: #ffffff !important; 
         color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
         white-space: nowrap !important; 
         word-break: keep-all !important;
     }
@@ -264,6 +286,7 @@ textarea { resize: none; }
         border: none !important;
         box-shadow: none !important;
         color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
         padding: 0 !important;
         font-weight: 800 !important;
         text-align: center !important;
@@ -280,9 +303,10 @@ textarea { resize: none; }
         background-color: #ffffff !important; 
         border: 1px solid #000000 !important; 
         color: #000000 !important; 
+        -webkit-text-fill-color: #000000 !important;
         font-size: 0.65rem !important;
         padding: 4px 8px !important;
     }
 
-    .text-\[2\.2rem\] { font-size: 1.3rem !important; margin: 0 !important; line-height: 1; color: #000000 !important; }
+    .text-\[2\.2rem\] { font-size: 1.3rem !important; margin: 0 !important; line-height: 1; color: #000000 !important; -webkit-text-fill-color: #000000 !important; }
 }
