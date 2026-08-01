@@ -116,15 +116,15 @@ textarea { resize: none; }
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
-/* [화면용] 데이터별 최적 너비 락인 적용 */
-.fc-qty-input { width: 3.5rem !important; }
-.fc-time-input { width: 4.8rem !important; }
-.fc-note-input { min-width: 110px; }
+/* [화면용] 데이터별 최적 너비 및 정렬 락인 적용 */
+.fc-qty-input { width: 3.5rem !important; text-align: center; }
+.fc-time-input { width: 4.8rem !important; text-align: center; }
+.fc-note-input { min-width: 110px; text-align: left; }
 
 /* 상단 가상 스크롤바 */
 #top-scroll-wrapper { width: 100%; overflow-y: hidden; }
 
-/* 🍒 프린트 미디어 쿼리 정밀 최적화 (주문수량 100% Solid Black vs 생산량/미생산 50% 연한 회색 명도 분리) */
+/* 🍒 프린트 미디어 쿼리 정밀 최적화 (상단 바인더 여백 16mm + 주문수량 100% Solid Black vs 생산량/미생산 50% 연한 회색 + 비고란 왼쪽 정렬) */
 @media print {
     @page { size: A4 portrait; margin: 16mm 5mm 5mm 5mm; } 
     body { background-color: #ffffff !important; color: #000000 !important; }
@@ -293,9 +293,10 @@ textarea { resize: none; }
         display: inline-block !important; 
     }
 
-    .fc-qty-input { width: 32px !important; }  
-    .fc-time-input { width: 58px !important; } 
-    .fc-note-input { width: 130px !important; } 
+    .fc-qty-input { width: 32px !important; text-align: center !important; }  
+    .fc-time-input { width: 58px !important; text-align: center !important; } 
+    /* 🍒 [피드백 반영] 세종상사 및 하단 거래처 비고 인쇄 텍스트 강제 좌측 정렬 */
+    .fc-note-input { width: 130px !important; text-align: left !important; } 
 
     ::placeholder { color: transparent !important; }
 

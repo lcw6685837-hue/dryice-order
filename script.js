@@ -93,7 +93,7 @@ const PRODUCTS = [
     { key: 'k20ap', label: '20kg(AP)', full: '20kg (AP)' }
 ];
 
-// 🚚 거래처 마스터 데이터 (화일상사 1/2, 용인드라이, 한국콜드체인 1/2 반영)
+// 🚚 거래처 마스터 데이터 (신규 거래처 '마켓컬리' 도착지 '평택' 지정)
 const CLIENTS = [
     { name: '화일공항', dest: '공항' },
     { name: '화일경보', dest: '공항' },
@@ -110,6 +110,7 @@ const CLIENTS = [
     { name: '엠엔엠', dest: '서산' },
     { name: '프레임', dest: '서울' },
     { name: '세종상사', dest: '이천' },
+    { name: '마켓컬리', dest: '평택' }, 
     { name: '대만(BUSH)', dest: '대만' }
 ];
 
