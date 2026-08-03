@@ -93,12 +93,13 @@ const PRODUCTS = [
     { key: 'k20ap', label: '20kg(AP)', full: '20kg (AP)' }
 ];
 
-// 🚚 거래처 마스터 데이터 (신규 거래처 '마켓컬리' 도착지 '평택' 지정)
+// 🚚 거래처 마스터 데이터 (v25: 영업팀 피드백 반영 '화일(빙그레)검단' 신규 추가)
 const CLIENTS = [
     { name: '화일공항', dest: '공항' },
     { name: '화일경보', dest: '공항' },
     { name: '빙그레(논산)', dest: '충청' }, 
     { name: '화일(빙그레)용인', dest: '용인' }, 
+    { name: '화일(빙그레)검단', dest: '검단' }, 
     { name: '화일상사(1)', dest: '용인' }, 
     { name: '화일상사(2)', dest: '용인' }, 
     { name: '영재상사', dest: '서울' },
@@ -110,7 +111,7 @@ const CLIENTS = [
     { name: '엠엔엠', dest: '서산' },
     { name: '프레임', dest: '서울' },
     { name: '세종상사', dest: '이천' },
-    { name: '마켓컬리', dest: '평택' }, 
+    { name: '컬리', dest: '평택' }, 
     { name: '대만(BUSH)', dest: '대만' }
 ];
 
@@ -130,10 +131,11 @@ const FC_LEFT = [
     { id: 'fc_kcc_2', label: '한국콜드체인(2)', type: 'normal' }, 
     { id: 'fc_gnb', label: '경기남부', type: 'normal' },
     { id: 'fc_mnm', label: '엠엔엠', type: 'normal' },
+    { id: 'fc_kurly', label: '컬리', type: 'normal' },
     { id: 'fc_hwail', label: '화일상사', type: 'normal' }
 ];
 
-// 익일 예상 물량 데이터셋 우측 패널
+// 익일 예상 물량 데이터셋 우측 패널 (v25: '화일(빙그레)검단' 신규 추가)
 const FC_RIGHT = [
     { id: 'fc_yongin', label: '용인드라이(D)', type: 'normal' }, 
     { id: 'fc_yongin_daesang', label: '용인드라이', type: 'normal' },
@@ -141,6 +143,7 @@ const FC_RIGHT = [
     { id: 'fc_file', label: '세종(빙그레)', type: 'normal' }, 
     { id: 'fc_youngjae', label: '영재', type: 'normal' },
     { id: 'fc_hwail_bing', label: '화일(빙그레)', type: 'normal' },
+    { id: 'fc_hwail_bing_geomdan', label: '화일(빙그레)<br>검단', type: 'normal' },
     { id: 'fc_hwail_sangsa', label: '화일상사', type: 'normal' }
 ];
 
@@ -420,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </td>`;
         } else {
             tr.innerHTML = `
-                <td class="font-bold w-32 whitespace-nowrap text-center">${row.label}</td>
+                <td class="font-bold w-32 whitespace-normal leading-tight text-center py-1.5">${row.label}</td>
                 <td>
                     <div class="flex items-center justify-between w-full gap-2 px-1">
                         <input type="text" id="${row.id}_note" class="fc-sub-input fc-note-input sync-item flex-1 bg-transparent border-none outline-none text-[#fde68a] font-bold py-1" placeholder="">
@@ -441,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
     FC_RIGHT.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td class="font-bold w-32 whitespace-nowrap text-center">${row.label}</td>
+            <td class="font-bold w-32 whitespace-normal leading-tight text-center py-1.5">${row.label}</td>
             <td>
                 <div class="flex items-center justify-between w-full gap-2 px-1">
                     <input type="text" id="${row.id}_note" class="fc-sub-input fc-note-input sync-item flex-1 bg-transparent border-none outline-none text-[#fde68a] font-bold py-1" placeholder="">
@@ -550,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // 주문 수량이 0인 거래처의 행들을 인쇄용 숨김 클래스(print-no-order)로 동적 제어
+            // 주문 수량이 0인 거래처의 행들은 인쇄용 숨김 클래스(print-no-order)로 동적 제어
             const clientRows = document.querySelectorAll(`.client-row-${ci}`);
             if (rowOrderSum === 0) {
                 clientRows.forEach(row => row.classList.add('print-no-order'));
