@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
-    <link rel="stylesheet" href="style.css?v=25">
+    <link rel="stylesheet" href="style.css?v=28">
 </head>
 <body class="p-4 lg:p-6 min-h-screen flex flex-col items-center">
 
@@ -185,7 +185,7 @@
         </div>
     </div>
 
-    <!-- 🚨 D/I 주문 접수 대형 현장 알림 팝업 모달 -->
+    <!-- 🚨 D/I 주문 접수 대형 현장 알림 팝업 모달 (v28: '확인' 버튼 왼쪽에 접수시각 타임스탬프 버튼 배치) -->
     <div id="order-alert-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/40 backdrop-blur-[2px] p-4 no-print transition-all duration-300">
         <div class="bg-slate-900/95 border-4 border-amber-500 rounded-3xl p-8 max-w-2xl w-full text-center shadow-[0_0_60px_rgba(245,158,11,0.6)] transform transition-all flex flex-col items-center">
             <div class="mb-4 inline-flex items-center justify-center w-20 h-20 bg-amber-500/20 text-amber-400 rounded-full border-2 border-amber-400/50 animate-bounce">
@@ -198,15 +198,23 @@
                 아래의 확인버튼을 누르면 팝업창이 사라집니다.
             </h2>
 
-            <button onclick="closeOrderAlert()" class="mt-2 mb-4 px-12 py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-2xl font-black rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.8)] active:scale-95 transition-all duration-200 cursor-pointer tracking-widest">
-                확 인 (완료)
-            </button>
+            <!-- ⏱️ 시안(image_24b2c3.png) 동일 배치: 접수시각 버튼 + 확인(완료) 버튼 -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full mt-2 mb-4">
+                <div id="alert-time-btn" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 text-xl md:text-2xl font-black rounded-2xl shadow-[0_0_25px_rgba(245,158,11,0.6)] border-2 border-amber-300 flex items-center justify-center gap-2 cursor-default select-none tracking-wide">
+                    <i class="far fa-clock text-2xl"></i>
+                    <span id="alert-timestamp-text">8/5 17:00</span>
+                </div>
+                
+                <button onclick="closeOrderAlert()" class="w-full sm:w-auto px-10 py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xl md:text-2xl font-black rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.8)] active:scale-95 transition-all duration-200 cursor-pointer tracking-widest whitespace-nowrap">
+                    확 인 (완료)
+                </button>
+            </div>
 
             <!-- 동적 거래처 네온 태그 영역 -->
             <div id="alert-client-tags" class="flex flex-wrap items-center justify-center gap-3 w-full mt-2 pt-4 border-t border-slate-800"></div>
         </div>
     </div>
 
-    <script src="script.js?v=25"></script>
+    <script src="script.js?v=28"></script>
 </body>
 </html>

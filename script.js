@@ -29,15 +29,36 @@ const db = firebase.database();
 // 🎨 글로벌 활성화 차수 변수
 let currentGlobalPhase = '1';
 
-// 🚨 스마트 포커스 감지형 알림 상태 및 변동 거래처 추적 변수
+// 🚨 스마트 포커스 감지형 알림 상태 및 변동 거래처 / 타임스탬프 추적 변수 (v28 신규)
 let isInitialLoad = true;
 let previousOrders = {};
 let pendingOrderAlert = false;
 let pendingChangedClients = new Set(); 
+let lastOrderChangeDateObj = null; // 접수 시각 타임스탬프 Date 객체
+let lastOrderChangeFormattedStr = ''; // '8/5 17:00' 형태 스트링
 
 function showOrderAlert() {
     const modal = document.getElementById('order-alert-modal');
     const tagsContainer = document.getElementById('alert-client-tags');
+    const timeTextEl = document.getElementById('alert-timestamp-text');
+
+    // ⏱️ 타임스탬프 및 상대 경과 시간 동적 표기
+    if (timeTextEl && lastOrderChangeFormattedStr) {
+        let relativeTimeStr = '';
+        if (lastOrderChangeDateObj) {
+            const diffMs = new Date() - lastOrderChangeDateObj;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            if (diffMins < 1) {
+                relativeTimeStr = ' (방금 전)';
+            } else if (diffMins < 60) {
+                relativeTimeStr = ` (${diffMins}분 전)`;
+            } else {
+                const diffHours = Math.floor(diffMins / 60);
+                relativeTimeStr = ` (${diffHours}시간 전)`;
+            }
+        }
+        timeTextEl.textContent = `${lastOrderChangeFormattedStr}${relativeTimeStr}`;
+    }
 
     if (tagsContainer) {
         if (pendingChangedClients.size > 0) {
@@ -93,7 +114,7 @@ const PRODUCTS = [
     { key: 'k20ap', label: '20kg(AP)', full: '20kg (AP)' }
 ];
 
-// 🚚 거래처 마스터 데이터 (v25: 영업팀 피드백 반영 '화일(빙그레)검단' 신규 추가)
+// 🚚 거래처 마스터 데이터
 const CLIENTS = [
     { name: '화일공항', dest: '공항' },
     { name: '화일경보', dest: '공항' },
@@ -135,7 +156,7 @@ const FC_LEFT = [
     { id: 'fc_hwail', label: '화일상사', type: 'normal' }
 ];
 
-// 익일 예상 물량 데이터셋 우측 패널 (v25: '화일(빙그레)검단' 신규 추가)
+// 익일 예상 물량 데이터셋 우측 패널
 const FC_RIGHT = [
     { id: 'fc_yongin', label: '용인드라이(D)', type: 'normal' }, 
     { id: 'fc_yongin_daesang', label: '용인드라이', type: 'normal' },
@@ -387,6 +408,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input type="text" id="fc_gyeongbo_150" class="fc-sub-input fc-qty-input sync-item text-center text-amber-300 font-bold" placeholder="">
                             <span>개, 200KG:</span>
                             <input type="text" id="fc_gyeongbo_200" class="fc-sub-input fc-qty-input sync-item text-center text-amber-300 font-bold" placeholder="">
+                            <span>개, 펠렛:</span>
+                            <input type="text" id="fc_gyeongbo_p" class="fc-sub-input fc-qty-input sync-item text-center text-amber-300 font-bold" placeholder="">
                             <span>개</span>
                         </div>
                         <div class="flex items-center gap-1 text-xs font-bold text-slate-400 print:text-black shrink-0">
@@ -691,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 🛡️ 3. Firebase 실시간 동기화 커넥션 코어
+    // 🛡️ 3. Firebase 실시간 동기화 커넥션 코어 (v28: 타임스탬프 실시간 포착 엔진 추가)
     const syncItems = document.querySelectorAll('.sync-item');
     let currentRef = null;
 
@@ -747,6 +770,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!isInitialLoad && hasOrderChanged) {
+                // ⏱️ 실시간 주문 변동 감지 시 최신 접수 시각 타임스탬프 생성 ('8/5 17:00' 형태)
+                lastOrderChangeDateObj = new Date();
+                const m = lastOrderChangeDateObj.getMonth() + 1;
+                const d = lastOrderChangeDateObj.getDate();
+                const hh = String(lastOrderChangeDateObj.getHours()).padStart(2, '0');
+                const mm = String(lastOrderChangeDateObj.getMinutes()).padStart(2, '0');
+                lastOrderChangeFormattedStr = `${m}/${d} ${hh}:${mm}`;
+
                 triggerSmartOrderAlert();
             }
 

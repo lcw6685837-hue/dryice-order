@@ -124,7 +124,7 @@ textarea { resize: none; }
 /* 상단 가상 스크롤바 */
 #top-scroll-wrapper { width: 100%; overflow-y: hidden; }
 
-/* 🍒 프린트 미디어 쿼리 정밀 최적화 (상단 바인더 여백 22mm 확장 + 헤더 우측 일시 밀착 배치) */
+/* 🍒 프린트 미디어 쿼리 정밀 최적화 */
 @media print {
     @page { size: A4 portrait; margin: 22mm 5mm 5mm 5mm; } 
     body { background-color: #ffffff !important; color: #000000 !important; }
@@ -187,14 +187,7 @@ textarea { resize: none; }
         padding: 0.5px 1px !important;
     }
     
-    .qty-cell { 
-        font-size: 0.82rem !important; 
-        padding: 0 !important; 
-        background-color: #ffffff !important; 
-        line-height: 1.05 !important;
-    }
-    
-    /* 1. 핵심 데이터 [주문수량]: 칠흑 같은 100% Solid Black (#000000, Font-Weight 900) + '계' 열 수량 확대 (0.82rem) */
+    /* 1. 핵심 데이터 [주문수량]: 칠흑 같은 100% Solid Black (#000000, Font-Weight 900) + 명확한 상위 시인성 크기 유지 (0.82rem) */
     .dg-table tbody tr.row-order .qty-cell,
     .dg-table tbody tr.row-order .qty-cell.phase-1,
     .dg-table tbody tr.row-order .qty-cell.phase-2,
@@ -205,30 +198,28 @@ textarea { resize: none; }
         -webkit-text-fill-color: #000000 !important;
         font-weight: 900 !important;
         font-size: 0.82rem !important;
+        line-height: 1.05 !important;
     }
 
-    /* 2. 보조 데이터 [생산량]: 인쇄 농도 50% 감쇄 중성 회색 (#666666, Font-Weight 600) 강제 */
+    /* 2. 보조 데이터 [생산량]: 인쇄 농도 50% 감쇄 중성 회색 (#666666, Font-Weight 600) + 50% 크기 축소 (0.50rem) */
     .dg-table tbody tr.row-prod .qty-cell,
     .dg-table tbody tr.row-prod .row-total-cell { 
         color: #666666 !important; 
         -webkit-text-fill-color: #666666 !important;
         font-weight: 600 !important;
+        font-size: 0.50rem !important;
+        line-height: 1.05 !important;
     }
 
-    /* 3. 보조 데이터 [미생산]: 인쇄 농도 50% 감쇄 중성 회색 (#666666) + '계' 열 미생산 크기를 생산량과 동일한 기본 크기로 축소 */
-    .dg-table tbody td.unprod-cell { 
-        font-size: 0.82rem !important; 
-        color: #666666 !important; 
-        -webkit-text-fill-color: #666666 !important;
-        font-weight: 600 !important;
-        text-decoration: underline !important;
-    }
-
+    /* 3. 보조 데이터 [미생산]: 인쇄 농도 50% 감쇄 중성 회색 (#666666, Font-Weight 600) + 50% 크기 축소 (0.50rem) */
+    .dg-table tbody td.unprod-cell,
     .dg-table tbody tr.row-unprod .row-total-cell { 
+        font-size: 0.50rem !important; 
         color: #666666 !important; 
         -webkit-text-fill-color: #666666 !important;
         font-weight: 600 !important;
         text-decoration: underline !important;
+        line-height: 1.05 !important;
     }
 
     .dg-table tfoot td { 
@@ -280,14 +271,14 @@ textarea { resize: none; }
     .fc-table th, .fc-table td { 
         border: 1px solid #cbd5e1 !important; 
         padding: 2px 4px !important; 
-        font-size: 0.58rem !important; 
+        font-size: 0.65rem !important; 
         background-color: #ffffff !important; 
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
         white-space: nowrap !important; 
         word-break: keep-all !important;
     }
-    
+
     .fc-sub-input {
         background-color: transparent !important;
         border: none !important;
@@ -296,13 +287,14 @@ textarea { resize: none; }
         -webkit-text-fill-color: #000000 !important;
         padding: 0 !important;
         font-weight: 800 !important;
+        font-size: 0.70rem !important;
         text-align: center !important;
         display: inline-block !important; 
     }
 
-    .fc-qty-input { width: 32px !important; text-align: center !important; }  
-    .fc-time-input { width: 58px !important; text-align: center !important; } 
-    .fc-note-input { width: 130px !important; text-align: left !important; } 
+    .fc-qty-input { width: 32px !important; text-align: center !important; font-size: 0.70rem !important; }  
+    .fc-time-input { width: 58px !important; text-align: center !important; font-size: 0.70rem !important; } 
+    .fc-note-input { width: 180px !important; text-align: left !important; font-size: 0.70rem !important; font-weight: 800 !important; } 
 
     ::placeholder { color: transparent !important; }
 
