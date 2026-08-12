@@ -16,176 +16,191 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
-    <link rel="stylesheet" href="style.css?v=28">
+    <link rel="stylesheet" href="style.css?v=31">
 </head>
-<body class="p-4 lg:p-6 min-h-screen flex flex-col items-center">
+<body>
 
-    <div class="w-full max-w-[1500px] flex-1 flex flex-col">
+    <!-- 🏰 앱 고정 전체 컨테이너 -->
+    <div class="app-container">
 
-        <div class="flex flex-col gap-3 mb-4">
-            <div class="flex justify-between items-center w-full relative z-20 gap-3">
-                <div class="flex-1"></div>
+        <!-- 📌 1. 상단 고정 제어 패널 헤더 -->
+        <header class="dashboard-header mb-2">
+            <div class="flex flex-col gap-2.5">
+                <div class="flex justify-between items-center w-full relative z-20 gap-3">
+                    <div class="flex-1"></div>
 
-                <!-- 일시 선택 영역 (인쇄 시에는 숨김 처리) -->
-                <div class="flex items-center gap-3 bg-[#1e293b] px-6 py-2 rounded-full border border-slate-600 shadow-inner no-print shrink-0">
-                    <span class="text-slate-400 font-bold text-sm tracking-widest">일 시 :</span>
-                    <input type="date" id="log-date" class="bg-transparent border-none text-xl font-black text-amber-400 outline-none cursor-pointer text-center">
-                    <span id="log-day" class="text-xl font-black text-amber-400 ml-1"></span>
-                </div>
-
-                <!-- 📅 좌우 신속 날짜 이동 패널 -->
-                <div class="flex items-center bg-[#1e293b] px-3 py-1.5 rounded-full border border-slate-600 shadow-inner no-print shrink-0">
-                    <button id="btn-prev-date" class="text-amber-400 hover:text-amber-300 active:scale-95 transition px-3 py-1 flex items-center justify-center" title="이전 날짜">
-                        <i class="fas fa-chevron-left text-lg"></i>
-                    </button>
-                    <div class="w-[1px] h-4 bg-slate-600 mx-1"></div>
-                    <button id="btn-next-date" class="text-amber-400 hover:text-amber-300 active:scale-95 transition px-3 py-1 flex items-center justify-center" title="다음 날짜">
-                        <i class="fas fa-chevron-right text-lg"></i>
-                    </button>
-                </div>
-
-                <div class="flex-1 flex justify-end gap-2 no-print shrink-0">
-                    <button onclick="toggleFullScreen()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded border border-slate-600 font-bold transition flex items-center gap-2 text-xs shadow-md"><i class="fas fa-expand"></i> 전체화면</button>
-                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded border border-slate-600 font-bold transition flex items-center gap-2 text-xs shadow-md"><i class="fas fa-print"></i> 인쇄</button>
-                    <button onclick="window.close()" class="bg-rose-900 hover:bg-rose-800 text-white px-3 py-1.5 rounded border border-rose-700 font-bold transition flex items-center gap-2 text-xs shadow-md"><i class="fas fa-times"></i> 닫기</button>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4 bg-blue-950/20 px-6 py-3 rounded-2xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] print:p-0 print:shadow-none print:bg-transparent print:border-none">
-                    <div class="bg-blue-500/20 p-2 rounded-xl border border-blue-500/50 print:border-none print:bg-transparent print:p-0">
-                        <i class="fas fa-snowflake text-[1.8rem] text-blue-400 no-print"></i>
-                        <i class="fas fa-snowflake text-[1.6rem] text-black hidden print:block"></i>
+                    <!-- 일시 선택 영역 (인쇄 시에는 숨김 처리) -->
+                    <div class="flex items-center gap-3 bg-[#1e293b] px-6 py-1.5 rounded-full border border-slate-600 shadow-inner no-print shrink-0">
+                        <span class="text-slate-400 font-bold text-sm tracking-widest">일 시 :</span>
+                        <input type="date" id="log-date" class="bg-transparent border-none text-xl font-black text-amber-400 outline-none cursor-pointer text-center">
+                        <span id="log-day" class="text-xl font-black text-amber-400 ml-1"></span>
                     </div>
-                    <h1 class="text-[2.2rem] font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 tracking-widest drop-shadow-md print:text-[1.6rem] print:text-black">DRYICE 주문 &amp; 생산현황</h1>
-                    
-                    <!-- 🎨 주문 차수 및 글자색 선택 제어 패널 -->
-                    <div class="flex items-center gap-1.5 bg-[#141b2e]/90 px-3 py-1 rounded-full border border-slate-700/80 no-print shadow-lg ml-4">
-                        <span class="text-[11px] font-bold text-slate-400 mr-1.5 whitespace-nowrap">주문 수량 색상:</span>
-                        <button type="button" id="btn-phase-1" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-sky-500/10 text-sky-400 border border-sky-500/30 hover:bg-sky-500/20 transition flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> 1차주문
+
+                    <!-- 📅 좌우 신속 날짜 이동 패널 -->
+                    <div class="flex items-center bg-[#1e293b] px-3 py-1 rounded-full border border-slate-600 shadow-inner no-print shrink-0">
+                        <button id="btn-prev-date" class="text-amber-400 hover:text-amber-300 active:scale-95 transition px-3 py-0.5 flex items-center justify-center" title="이전 날짜">
+                            <i class="fas fa-chevron-left text-lg"></i>
                         </button>
-                        <button type="button" id="btn-phase-2" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700/50 transition flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> 2차주문
+                        <div class="w-[1px] h-4 bg-slate-600 mx-1"></div>
+                        <button id="btn-next-date" class="text-amber-400 hover:text-amber-300 active:scale-95 transition px-3 py-0.5 flex items-center justify-center" title="다음 날짜">
+                            <i class="fas fa-chevron-right text-lg"></i>
                         </button>
-                        <button type="button" id="btn-phase-3" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 transition flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 3차주문
-                        </button>
-                        <button type="button" id="btn-phase-4" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 hover:bg-yellow-500/30 transition flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span> 확 정
-                        </button>
+                    </div>
+
+                    <div class="flex-1 flex justify-end gap-2 no-print shrink-0">
+                        <button onclick="toggleFullScreen()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded border border-slate-600 font-bold transition flex items-center gap-2 text-xs shadow-md"><i class="fas fa-expand"></i> 전체화면</button>
+                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded border border-slate-600 font-bold transition flex items-center gap-2 text-xs shadow-md"><i class="fas fa-print"></i> 인쇄</button>
+                        <button onclick="window.close()" class="bg-rose-900 hover:bg-rose-800 text-white px-3 py-1.5 rounded border border-rose-700 font-bold transition flex items-center gap-2 text-xs shadow-md"><i class="fas fa-times"></i> 닫기</button>
                     </div>
                 </div>
 
-                <!-- 🚚 차량출고 네온 버튼 영역 및 인쇄 전용 날짜 표시 패널 -->
-                <div class="flex items-center gap-3">
-                    <div class="relative group no-print">
-                        <a href="https://lcw6685837-hue.github.io/outbound_log/" 
-                           target="_blank"
-                           class="flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs tracking-wider text-slate-950 bg-gradient-to-r from-yellow-300 via-lime-400 to-emerald-400 hover:from-yellow-200 hover:to-emerald-300 border border-lime-300 shadow-[0_0_15px_rgba(163,230,53,0.5)] hover:shadow-[0_0_25px_rgba(163,230,53,0.8)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer animate-pulse">
-                            <i class="fas fa-shipping-fast text-sm animate-bounce"></i>
-                            <span>차량 출고</span>
-                        </a>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4 bg-blue-950/20 px-5 py-2 rounded-2xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] print:p-0 print:shadow-none print:bg-transparent print:border-none">
+                        <div class="bg-blue-500/20 p-2 rounded-xl border border-blue-500/50 print:border-none print:bg-transparent print:p-0">
+                            <i class="fas fa-snowflake text-[1.6rem] text-blue-400 no-print"></i>
+                            <i class="fas fa-snowflake text-[1.6rem] text-black hidden print:block"></i>
+                        </div>
+                        <h1 class="text-[2rem] font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 tracking-widest drop-shadow-md print:text-[1.6rem] print:text-black">DRYICE 주문 &amp; 생산현황</h1>
                         
-                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-950/95 border border-lime-400/40 text-lime-400 text-[11px] font-bold rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.6)] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-300 ease-out translate-y-1 group-hover:translate-y-0 z-30">
-                            차량 출고 기록 사이트로 이동합니다
-                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-950/95"></div>
+                        <!-- 🎨 주문 차수 및 글자색 선택 제어 패널 -->
+                        <div class="flex items-center gap-1.5 bg-[#141b2e]/90 px-3 py-1 rounded-full border border-slate-700/80 no-print shadow-lg ml-4">
+                            <span class="text-[11px] font-bold text-slate-400 mr-1.5 whitespace-nowrap">주문 수량 색상:</span>
+                            <button type="button" id="btn-phase-1" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-sky-500/10 text-sky-400 border border-sky-500/30 hover:bg-sky-500/20 transition flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span> 1차주문
+                            </button>
+                            <button type="button" id="btn-phase-2" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700/50 transition flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> 2차주문
+                            </button>
+                            <button type="button" id="btn-phase-3" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 hover:bg-emerald-500/30 transition flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 3차주문
+                            </button>
+                            <button type="button" id="btn-phase-4" class="phase-btn px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 hover:bg-yellow-500/30 transition flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span> 확 정
+                            </button>
                         </div>
                     </div>
 
-                    <!-- 🖨️ 인쇄 전용 일시 표기 (우측 끝 밀착 정렬) -->
-                    <div id="print-date-wrapper" class="hidden print:flex items-center gap-2 text-black font-black text-sm border-2 border-black/80 px-4 py-1 rounded-xl shrink-0">
-                        <span>일시 :</span>
-                        <span id="print-log-date" class="font-black"></span>
-                        <span id="print-log-day" class="font-black ml-1"></span>
+                    <!-- 🚚 차량출고 네온 버튼 영역 및 인쇄 전용 날짜 표시 패널 -->
+                    <div class="flex items-center gap-3">
+                        <div class="relative group no-print">
+                            <a href="https://lcw6685837-hue.github.io/outbound_log/" 
+                               target="_blank"
+                               class="flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs tracking-wider text-slate-950 bg-gradient-to-r from-yellow-300 via-lime-400 to-emerald-400 hover:from-yellow-200 hover:to-emerald-300 border border-lime-300 shadow-[0_0_15px_rgba(163,230,53,0.5)] hover:shadow-[0_0_25px_rgba(163,230,53,0.8)] transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer animate-pulse">
+                                <i class="fas fa-shipping-fast text-sm animate-bounce"></i>
+                                <span>차량 출고</span>
+                            </a>
+                            
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-950/95 border border-lime-400/40 text-lime-400 text-[11px] font-bold rounded-lg shadow-[0_4px_15px_rgba(0,0,0,0.6)] whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-300 ease-out translate-y-1 group-hover:translate-y-0 z-30">
+                                차량 출고 기록 사이트로 이동합니다
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-950/95"></div>
+                            </div>
+                        </div>
+
+                        <!-- 🖨️ 인쇄 전용 일시 표기 -->
+                        <div id="print-date-wrapper" class="hidden print:flex items-center gap-2 text-black font-black text-sm border-2 border-black/80 px-4 py-1 rounded-xl shrink-0">
+                            <span>일시 :</span>
+                            <span id="print-log-date" class="font-black"></span>
+                            <span id="print-log-day" class="font-black ml-1"></span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 상단 가상 스크롤바 -->
-        <div id="top-scroll-wrapper" class="overflow-x-auto no-print mb-1.5" style="scrollbar-width: thin;">
-            <div id="top-scroll-spacer" style="height: 1px;"></div>
-        </div>
+            <!-- 상단 가상 스크롤바 -->
+            <div id="top-scroll-wrapper" class="overflow-x-auto no-print mt-1" style="scrollbar-width: thin;">
+                <div id="top-scroll-spacer" style="height: 1px;"></div>
+            </div>
+        </header>
 
-        <div id="table-wrapper" class="overflow-x-auto rounded-xl border-[3px] border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.2)] print:border-none print:border-0 print:shadow-none">
-            <table class="dg-table">
-                <colgroup>
-                    <col class="col-client">
-                    <col class="col-type">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-qty">
-                    <col class="col-total">
-                    <col class="col-dest">
-                    <col class="col-remark">
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th rowspan="3">거래처명</th>
-                        <th rowspan="3">구분</th>
-                        <th colspan="2">PELLET</th> 
-                        <th colspan="3">B 타입</th>
-                        <th colspan="3" class="text-slate-400">1F 자동화</th> 
-                        <th colspan="3">30kg</th>
-                        <th rowspan="3">20kg<br>(AP)</th> 
-                        <th rowspan="3">계</th>
-                        <th rowspan="3">도착지</th>
-                        <th rowspan="3" class="remark-header">비 고</th>
-                    </tr>
-                    <tr class="sub-head">
-                        <th rowspan="2">100kg<br>(16mm)</th>
-                        <th rowspan="2">200kg<br>(3mm)</th>
-                        <th rowspan="2">150kg</th>
-                        <th rowspan="2">200kg</th>
-                        <th rowspan="2">250kg</th>
-                        <th rowspan="2">400g<br>(19.2kg)</th> 
-                        <th rowspan="2">500g<br>(21kg)</th>  
-                        <th rowspan="2">600g<br>(21.6kg)</th> 
-                        <th rowspan="2">블럭</th>
-                        <th colspan="2">조각</th>
-                    </tr>
-                    <tr class="sub-head">
-                        <th>8P</th>
-                        <th>16P</th>
-                    </tr>
-                </thead>
-                <tbody id="dg-body"></tbody>
-                <tfoot>
-                    <tr id="dg-total-row">
-                        <td colspan="2" class="total-label">합 계</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <!-- 익일 예상 물량 영역 -->
-        <div class="fc-section-box mt-6 rounded-xl border-[2px] border-slate-600 overflow-hidden print:border-none print:border-0">
-            <div class="bg-slate-800/80 text-center py-2 font-black tracking-widest text-lg print:bg-white print:text-black">익일 예상 물량</div>
-            <div class="fc-grid-container grid grid-cols-1 md:grid-cols-2 gap-0 items-start">
-                <table class="fc-table w-full border-collapse">
-                    <tbody id="fc-left-body"></tbody>
-                </table>
-                <table class="fc-table w-full border-collapse">
-                    <tbody id="fc-right-body"></tbody>
+        <!-- 📜 2. 메인 화면 레이아웃 (테이블 극대화 + 익일 예상 물량 가변 스크롤) -->
+        <main class="dashboard-main-content">
+            <!-- 📊 메인 테이블 영역 (중앙 가변 flex: 1 & 독립 스크롤) -->
+            <div id="table-wrapper" class="table-scroll-container">
+                <table class="dg-table">
+                    <colgroup>
+                        <col class="col-client">
+                        <col class="col-type">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-qty">
+                        <col class="col-total">
+                        <col class="col-dest">
+                        <col class="col-remark">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th rowspan="3">거래처명</th>
+                            <th rowspan="3">구분</th>
+                            <th colspan="2">PELLET</th> 
+                            <th colspan="3">B 타입</th>
+                            <th colspan="3" class="text-slate-400">1F 자동화</th> 
+                            <th colspan="3">30kg</th>
+                            <th rowspan="3">20kg<br>(AP)</th> 
+                            <th rowspan="3">계</th>
+                            <th rowspan="3">도착지</th>
+                            <th rowspan="3" class="remark-header">비 고</th>
+                        </tr>
+                        <tr class="sub-head">
+                            <th rowspan="2">100kg<br>(16mm)</th>
+                            <th rowspan="2">200kg<br>(3mm)</th>
+                            <th rowspan="2">150kg</th>
+                            <th rowspan="2">200kg</th>
+                            <th rowspan="2">250kg</th>
+                            <th rowspan="2">400g<br>(19.2kg)</th> 
+                            <th rowspan="2">500g<br>(21kg)</th>  
+                            <th rowspan="2">600g<br>(21.6kg)</th> 
+                            <th rowspan="2">블럭</th>
+                            <th colspan="2">조각</th>
+                        </tr>
+                        <tr class="sub-head">
+                            <th>8P</th>
+                            <th>16P</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dg-body"></tbody>
+                    <tfoot>
+                        <tr id="dg-total-row">
+                            <td colspan="2" class="total-label">합 계</td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
-            <div class="fc-note-box bg-amber-300/90 text-black font-bold text-sm px-4 py-2 text-right print:text-black print:bg-white">
-                파렛트 상차시 작업 후 랩핑, 살포 부탁드립니다
+
+            <!-- 📌 익일 예상 물량 영역 (🍒 캡틴의 축소 제안 + 체리의 원클릭 [접기/펼치기] 스위치 탑재) -->
+            <div class="fc-section-box rounded-xl border-[2px] border-slate-600 overflow-hidden print:border-none print:border-0">
+                <div class="bg-slate-800/90 px-4 py-1.5 flex items-center justify-between print:bg-white print:text-black border-b border-slate-700/80">
+                    <div class="flex-1 text-center font-black tracking-widest text-base pl-12 print:pl-0">익일 예상 물량</div>
+                    <button type="button" id="btn-toggle-fc" onclick="toggleFcSection()" class="no-print bg-slate-700/80 hover:bg-slate-600 text-amber-300 px-3 py-0.5 rounded-lg border border-slate-500/50 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm">
+                        <i id="icon-toggle-fc" class="fas fa-chevron-down text-[10px]"></i>
+                        <span id="text-toggle-fc">접기</span>
+                    </button>
+                </div>
+                <div class="fc-grid-container grid grid-cols-1 md:grid-cols-2 gap-0 items-start">
+                    <table class="fc-table w-full border-collapse">
+                        <tbody id="fc-left-body"></tbody>
+                    </table>
+                    <table class="fc-table w-full border-collapse">
+                        <tbody id="fc-right-body"></tbody>
+                    </table>
+                </div>
+                <div class="fc-note-box bg-amber-300/90 text-black font-bold text-xs px-4 py-1.5 text-right print:text-black print:bg-white">
+                    파렛트 상차시 작업 후 랩핑, 살포 부탁드립니다
+                </div>
             </div>
-        </div>
+        </main>
+
     </div>
 
-    <!-- 🚨 D/I 주문 접수 대형 현장 알림 팝업 모달 (v28: '확인' 버튼 왼쪽에 접수시각 타임스탬프 버튼 배치) -->
+    <!-- 🚨 D/I 주문 접수 대형 현장 알림 팝업 모달 -->
     <div id="order-alert-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/40 backdrop-blur-[2px] p-4 no-print transition-all duration-300">
         <div class="bg-slate-900/95 border-4 border-amber-500 rounded-3xl p-8 max-w-2xl w-full text-center shadow-[0_0_60px_rgba(245,158,11,0.6)] transform transition-all flex flex-col items-center">
             <div class="mb-4 inline-flex items-center justify-center w-20 h-20 bg-amber-500/20 text-amber-400 rounded-full border-2 border-amber-400/50 animate-bounce">
@@ -198,7 +213,6 @@
                 아래의 확인버튼을 누르면 팝업창이 사라집니다.
             </h2>
 
-            <!-- ⏱️ 시안(image_24b2c3.png) 동일 배치: 접수시각 버튼 + 확인(완료) 버튼 -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full mt-2 mb-4">
                 <div id="alert-time-btn" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 text-xl md:text-2xl font-black rounded-2xl shadow-[0_0_25px_rgba(245,158,11,0.6)] border-2 border-amber-300 flex items-center justify-center gap-2 cursor-default select-none tracking-wide">
                     <i class="far fa-clock text-2xl"></i>
@@ -215,6 +229,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=28"></script>
+    <script src="script.js?v=31"></script>
 </body>
 </html>
