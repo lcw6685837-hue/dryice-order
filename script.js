@@ -10,7 +10,7 @@ function toggleFullScreen() {
   }
 }
 
-// 🍒 체리의 추가 구현: 익일 예상 물량 원클릭 접고 펼치기(Accordion Toggle) 제어 함수
+// 🍒 체리의 구현: 익일 예상 물량 원클릭 접고 펼치기(Accordion Toggle) 제어 함수
 function toggleFcSection() {
   const fcBox = document.querySelector(".fc-section-box");
   const icon = document.getElementById("icon-toggle-fc");
@@ -613,13 +613,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ── 자동 계산 엔진 ──
+  // ── 🖨️ 스마트 날짜 판별 및 자동 계산 엔진 ──
   function recalcAll() {
     let grandOrderTotal = 0;
     const colOrderTotals = {};
     PRODUCTS.forEach((p) => {
       colOrderTotals[p.key] = 0;
     });
+
+    // 📅 조회 일자 감지 및 '오늘' 날짜 비교 (미래일 판별)
+    const dateInput = document.getElementById("log-date");
+    const selectedDateStr = dateInput ? dateInput.value : "";
+
+    const todayObj = new Date();
+    const yyyy = todayObj.getFullYear();
+    const mm = String(todayObj.getMonth() + 1).padStart(2, "0");
+    const dd = String(todayObj.getDate()).padStart(2, "0");
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    // 미래 날짜 여부 판단 (YYYY-MM-DD 포맷 비교)
+    const isFutureDate = selectedDateStr > todayStr;
 
     CLIENTS.forEach((client, ci) => {
       let rowOrderSum = 0,
@@ -677,12 +690,25 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const clientRows = document.querySelectorAll(`.client-row-${ci}`);
-      if (rowOrderSum === 0) {
+      // 🖨️ [인쇄 가시성 스마트 조건 분기]
+      // 1. 당일 및 과거일(!isFutureDate): 주문 수량이 0인 거래처는 인쇄 시 숨김
+      // 2. 미래일(isFutureDate): 주문 수량이 0이어도 모든 거래처를 인쇄물에 표시!
+      if (!isFutureDate && rowOrderSum === 0) {
         clientRows.forEach((row) => row.classList.add("print-no-order"));
       } else {
         clientRows.forEach((row) => row.classList.remove("print-no-order"));
       }
     });
+
+    // 🖨️ [미래일 인쇄 전용 제어] 미래 일자 출력 시 '익일 예상 물량' 패널 자동 숨김 클래스 부여
+    const fcSection = document.querySelector(".fc-section-box");
+    if (fcSection) {
+      if (isFutureDate) {
+        fcSection.classList.add("print-hide-future");
+      } else {
+        fcSection.classList.remove("print-hide-future");
+      }
+    }
 
     PRODUCTS.forEach((p) => {
       document.getElementById(`col_${p.key}_total`).textContent =

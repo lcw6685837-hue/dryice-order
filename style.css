@@ -164,14 +164,14 @@ textarea { resize: none; }
 .fc-input { background: transparent; border: none; outline: none; color: #fde68a; font-weight: 700; text-align: left; width: 100%; font-size: 1.3rem; padding: 2px 6px; }
 .fc-input:focus { background-color: rgba(59, 130, 246, 0.15); }
 
-/* 📌 익일 예상 물량 패널 (옵션 A 반영: 210px로 기분 좋게 확충!) */
+/* 📌 익일 예상 물량 패널 (옵션 A 반영: 210px 높이) */
 .fc-section-box {
     flex-shrink: 0;
     transition: all 0.3s ease-in-out;
     background-color: #0f172a;
 }
 
-/* 🍒 캡틴의 요청 [옵션 A]: 높이 살짝 확장 (145px -> 210px) 시원한 가시성 확보! */
+/* 🍒 높이 살짝 확장 (210px) 가시성 확보 */
 .fc-grid-container {
     max-height: 210px;
     overflow-y: auto;
@@ -227,7 +227,7 @@ textarea { resize: none; }
 #top-scroll-wrapper { width: 100%; overflow-y: hidden; }
 
 /* ==========================================================================
-   🍒 캡틴의 장인정신이 담긴 인쇄 미디어 쿼리 (100% 원본 무손실 보존 구역)
+   🍒 캡틴의 장인정신이 담긴 인쇄 미디어 쿼리 (동적 출력 서식 제어 구역)
    ========================================================================== */
 @media print {
     @page { size: A4 portrait; margin: 22mm 5mm 5mm 5mm; } 
@@ -276,10 +276,15 @@ textarea { resize: none; }
         background: #ffffff !important;
     }
 
-    .no-print, #order-alert-modal { display: none !important; }
-    if (#top-scroll-wrapper) #top-scroll-wrapper { display: none !important; }
+    .no-print, #order-alert-modal, #top-scroll-wrapper { display: none !important; }
 
+    /* 당일/과거 인쇄 시 주문수량이 0인 행 숨김 처리 */
     tr.print-no-order {
+        display: none !important;
+    }
+
+    /* 🖨️ [미래일 인쇄 동적 제어] 미래 날짜 인쇄 시 익일 예상 물량 패널 완전 숨김 */
+    .fc-section-box.print-hide-future {
         display: none !important;
     }
 
@@ -384,7 +389,7 @@ textarea { resize: none; }
         background-color: #ffffff !important;
     }
 
-    /* 🖨️ 인쇄 시에는 접힌 상태 무시하고 모든 익일 예상 물량 강제 완전 출력 */
+    /* 당일/과거 인쇄 시에는 접힌 상태 무시하고 익일 예상 물량 완전 출력 */
     .fc-section-box {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
