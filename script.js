@@ -162,7 +162,7 @@ const PRODUCTS = [
   { key: "k20ap", label: "20kg(AP)", full: "20kg (AP)" },
 ];
 
-// 🚚 거래처 마스터 데이터
+// 🚚 거래처 마스터 데이터 (🍒 '컬리'와 '대만(BUSH)' 사이에 '( 기타 )' 항목 추가 완료!)
 const CLIENTS = [
   { name: "화일공항", dest: "공항" },
   { name: "화일경보", dest: "공항" },
@@ -181,6 +181,7 @@ const CLIENTS = [
   { name: "프레임", dest: "서울" },
   { name: "세종상사", dest: "이천" },
   { name: "컬리", dest: "평택" },
+  { name: "( 기타 )", dest: "" }, // ✨ 긴급/미등록 거래처 수용을 위한 신규 슬롯 추가!
   { name: "대만(BUSH)", dest: "대만" },
 ];
 
@@ -692,7 +693,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const clientRows = document.querySelectorAll(`.client-row-${ci}`);
       // 🖨️ [인쇄 가시성 스마트 조건 분기]
       // 1. 당일 및 과거일(!isFutureDate): 주문 수량이 0인 거래처는 인쇄 시 숨김
-      // 2. 미래일(isFutureDate): 주문 수량이 0이어도 모든 거래처를 인쇄물에 표시!
+      // 2. 미래일(isFutureDate): 주문 수량이 0이어도 신규 추가된 '( 기타 )'를 포함해 모든 거래처를 인쇄물에 표시!
       if (!isFutureDate && rowOrderSum === 0) {
         clientRows.forEach((row) => row.classList.add("print-no-order"));
       } else {
