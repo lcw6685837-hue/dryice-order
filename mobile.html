@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0b1120">
+    <title>DRYICE 주문 (휴대폰)</title>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Firebase SDK (대시보드와 동일 버전) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            background-color: #0b1120;
+            color: #e2e8f0;
+        }
+
+        button { font-family: inherit; cursor: pointer; }
+
+        /* 📌 상단 고정 헤더 */
+        .top {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: #0b1120;
+            border-bottom: 2px solid #3b82f6;
+            padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .title-row { display: flex; align-items: center; gap: 8px; }
+        .title-row h1 { margin: 0; font-size: 1.05rem; font-weight: 900; color: #38bdf8; letter-spacing: 0.05em; flex: 1; }
+        .conn-dot { width: 10px; height: 10px; border-radius: 50%; background-color: #64748b; }
+        .conn-dot.on { background-color: #4ade80; }
+        .conn-dot.off { background-color: #f87171; }
+        .pc-link { color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-decoration: none; border: 1px solid #475569; border-radius: 999px; padding: 4px 10px; }
+
+        /* 📅 날짜 이동 */
+        .date-row { display: flex; align-items: center; gap: 6px; }
+        .date-row button {
+            height: 44px; min-width: 44px; border-radius: 12px; border: 1px solid #475569;
+            background-color: #1e293b; color: #fbbf24; font-size: 1.4rem; font-weight: 900;
+        }
+        .date-row button.today { font-size: 0.8rem; padding: 0 10px; }
+        .date-box {
+            flex: 1; height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px;
+            background-color: #1e293b; border: 1px solid #475569; border-radius: 12px;
+        }
+        .date-box input {
+            background: transparent; border: none; outline: none; color: #fbbf24;
+            font-size: 1.05rem; font-weight: 900; font-family: inherit; text-align: center; min-width: 0;
+        }
+        .date-box input::-webkit-calendar-picker-indicator { filter: invert(1); }
+        .date-box span { color: #fbbf24; font-weight: 900; font-size: 1rem; }
+
+        /* 🎨 주문 차수 버튼 */
+        .phase-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .phase-btn {
+            height: 40px; border-radius: 10px; border: 1px solid #334155;
+            background-color: #1e293b; color: #94a3b8; font-size: 0.85rem; font-weight: 800;
+        }
+        .phase-btn.active[data-phase="1"] { background-color: rgba(14, 165, 233, 0.25); color: #38bdf8; border-color: #38bdf8; }
+        .phase-btn.active[data-phase="2"] { background-color: rgba(244, 63, 94, 0.25); color: #f87171; border-color: #f87171; }
+        .phase-btn.active[data-phase="3"] { background-color: rgba(16, 185, 129, 0.25); color: #4ade80; border-color: #4ade80; }
+        .phase-btn.active[data-phase="4"] { background-color: rgba(234, 179, 8, 0.25); color: #facc15; border-color: #facc15; }
+
+        /* 합계 · 필터 */
+        .info-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .filter-btn {
+            height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid #475569;
+            background-color: #1e293b; color: #cbd5e1; font-size: 0.8rem; font-weight: 800;
+        }
+        .filter-btn.active { background-color: #fbbf24; color: #0f172a; border-color: #fbbf24; }
+        .grand { font-size: 0.85rem; font-weight: 700; color: #94a3b8; }
+        .grand b { font-size: 1.3rem; font-weight: 900; color: #67e8f9; margin-left: 6px; }
+
+        /* 🚚 거래처 카드 */
+        main { padding: 10px 10px calc(24px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 8px; }
+
+        .card { background-color: #0f172a; border: 1px solid #334155; border-radius: 14px; overflow: hidden; }
+        .card.has-order { border-color: #3b82f6; }
+        .card.hidden { display: none; }
+
+        .card-head {
+            width: 100%; min-height: 52px; display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px; background-color: #1e293b; border: none; color: #f1f5f9; text-align: left;
+        }
+        .card-head .name { font-size: 1.05rem; font-weight: 800; }
+        .card-head .dest { font-size: 0.75rem; font-weight: 700; color: #94a3b8; flex: 1; }
+        .card-head .prod { font-size: 0.72rem; font-weight: 700; color: #fdba74; }
+        .card-head .sum { font-size: 1.25rem; font-weight: 900; color: #67e8f9; }
+        .card-head .chev { color: #64748b; font-size: 0.9rem; transition: transform 0.2s; }
+        .card.open .chev { transform: rotate(180deg); }
+
+        /* 접힌 상태에서 보이는 주문 요약 */
+        .summary { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+        .summary:empty, .card.open .summary { display: none; }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chips:empty { display: none; }
+        .chip {
+            display: inline-flex; align-items: baseline; gap: 6px; padding: 4px 10px;
+            background-color: rgba(56, 189, 248, 0.10); border: 1px solid #334155; border-radius: 8px;
+            font-size: 0.78rem; font-weight: 700; color: #cbd5e1;
+        }
+        .chip b { font-size: 1.05rem; font-weight: 900; }
+        .remark-view { font-size: 0.8rem; color: #cbd5e1; white-space: pre-wrap; word-break: break-all; }
+        .remark-view:empty { display: none; }
+
+        /* 펼친 상태의 입력 영역 */
+        .card-body { display: none; padding: 10px 12px 12px; }
+        .card.open .card-body { display: block; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .cell { display: flex; flex-direction: column; gap: 3px; }
+        .cell .lbl { font-size: 0.75rem; font-weight: 700; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cell .sub { font-size: 0.7rem; font-weight: 700; color: #fdba74; min-height: 0.9rem; }
+
+        .qty {
+            width: 100%; height: 48px; border-radius: 10px; border: 1px solid #475569;
+            background-color: rgba(56, 189, 248, 0.10); text-align: center;
+            font-size: 1.35rem; font-weight: 800; font-family: inherit; outline: none;
+        }
+        .qty:focus { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.25); }
+
+        /* 차수별 글자색 (PC 화면과 동일) */
+        .phase-1 { color: #38bdf8; }
+        .phase-2 { color: #f87171; }
+        .phase-3 { color: #4ade80; }
+        .phase-4 { color: #ffffff; }
+
+        .remark {
+            width: 100%; margin-top: 10px; min-height: 60px; border-radius: 10px; border: 1px solid #475569;
+            background-color: #1e293b; color: #e2e8f0; font-size: 1rem; font-family: inherit;
+            line-height: 1.4; padding: 8px 10px; outline: none; resize: none;
+        }
+        .remark:focus { border-color: #3b82f6; }
+
+        /* 품목별 합계 */
+        .totals { background-color: #0f172a; border: 1px solid #475569; border-radius: 14px; overflow: hidden; }
+        .totals h2 { margin: 0; padding: 10px 12px; background-color: #1e293b; font-size: 0.95rem; font-weight: 900; text-align: center; letter-spacing: 0.1em; }
+        .totals .row { display: flex; justify-content: space-between; padding: 8px 14px; border-top: 1px solid #334155; font-size: 0.9rem; font-weight: 700; }
+        .totals .row b { font-size: 1.05rem; font-weight: 900; }
+        .totals .row.grand-row { background-color: rgba(6, 182, 212, 0.10); color: #67e8f9; }
+        .totals .empty { padding: 14px; text-align: center; color: #64748b; font-size: 0.85rem; font-weight: 700; border-top: 1px solid #334155; }
+
+        /* 🔔 알림 토스트 */
+        #toast {
+            position: fixed; left: 12px; right: 12px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 50;
+            padding: 12px 14px; border-radius: 12px; border: 2px solid #f43f5e;
+            background-color: rgba(136, 19, 55, 0.95); color: #fecdd3; font-size: 0.85rem; font-weight: 800;
+            text-align: center; display: none;
+        }
+        #toast.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- 📌 상단 고정 헤더 -->
+    <header class="top">
+        <div class="title-row">
+            <h1>DRYICE 주문</h1>
+            <span id="conn-dot" class="conn-dot" title="연결 상태"></span>
+            <a class="pc-link" href="index.html?pc=1">PC 화면</a>
+        </div>
+
+        <div class="date-row">
+            <button type="button" id="btn-prev-date" aria-label="이전 날짜">&lsaquo;</button>
+            <div class="date-box">
+                <input type="date" id="log-date">
+                <span id="log-day"></span>
+            </div>
+            <button type="button" id="btn-next-date" aria-label="다음 날짜">&rsaquo;</button>
+            <button type="button" id="btn-today" class="today">오늘</button>
+        </div>
+
+        <div class="phase-row">
+            <button type="button" class="phase-btn" data-phase="1">1차주문</button>
+            <button type="button" class="phase-btn" data-phase="2">2차주문</button>
+            <button type="button" class="phase-btn" data-phase="3">3차주문</button>
+            <button type="button" class="phase-btn" data-phase="4">확 정</button>
+        </div>
+
+        <div class="info-row">
+            <button type="button" id="btn-filter" class="filter-btn">주문 있는 곳만</button>
+            <div class="grand">주문 합계<b id="grand_total">0</b></div>
+        </div>
+    </header>
+
+    <main>
+        <div id="list" style="display: contents;"></div>
+
+        <section class="totals">
+            <h2>품목별 주문 합계</h2>
+            <div id="totals-body"></div>
+        </section>
+    </main>
+
+    <div id="toast"></div>
+
+    <script src="data.js?v=32"></script>
+    <script>
+        // 🛡️ Firebase 설정 초기화 (대시보드 script.js 와 동일한 값)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_JNWO5Ke5ZVJDnwP06QW9WsZXNZFv0bc",
+            authDomain: "sundochem-dashboard.firebaseapp.com",
+            databaseURL: "https://sundochem-dashboard-default-rtdb.firebaseio.com",
+            projectId: "sundochem-dashboard",
+            storageBucket: "sundochem-dashboard.firebasestorage.app",
+            messagingSenderId: "360796635566",
+            appId: "1:360796635566:web:d3bf85eb5e5e1574b5483f"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        const PHASE_CLASSES = ["phase-1", "phase-2", "phase-3", "phase-4"];
+        const DAYS_OF_WEEK = ["일", "월", "화", "수", "목", "금", "토"];
+
+        let currentRef = null;
+        let currentGlobalPhase = "1";
+        let currentData = {};
+        let onlyOrdered = false;
+
+        const dateInput = document.getElementById("log-date");
+        const dayDisplay = document.getElementById("log-day");
+        const listEl = document.getElementById("list");
+
+        function parseCommaNum(str) {
+            const n = parseInt(String(str).replace(/,/g, ""), 10);
+            return isNaN(n) ? 0 : n;
+        }
+        function formatNum(num) {
+            return num.toLocaleString("ko-KR");
+        }
+
+        // 빙그레(논산)은 PC 화면과 동일하게 30kg 블럭만 입력 가능
+        function productsOf(client) {
+            return client.name === "빙그레(논산)" ? PRODUCTS.filter((p) => p.key === "k30a") : PRODUCTS;
+        }
+
+        function setPhaseClass(el, phase) {
+            el.classList.remove(...PHASE_CLASSES);
+            el.classList.add(`phase-${phase}`);
+        }
+
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove("show"), 4000);
+        }
+
+        // ── 📅 날짜 제어 ──
+        function toDateStr(d) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const dd = String(d.getDate()).padStart(2, "0");
+            return `${yyyy}-${mm}-${dd}`;
+        }
+        function parseDateStr(str) {
+            const [y, m, d] = str.split("-").map(Number);
+            return new Date(y, m - 1, d);
+        }
+        function changeDate(dateStr) {
+            dateInput.value = dateStr || toDateStr(new Date());
+            dayDisplay.textContent = DAYS_OF_WEEK[parseDateStr(dateInput.value).getDay()] + "요일";
+            if (firebase.auth().currentUser) loadLogData(dateInput.value);
+        }
+        function shiftDate(days) {
+            const d = parseDateStr(dateInput.value);
+            d.setDate(d.getDate() + days);
+            changeDate(toDateStr(d));
+        }
+
+        // ── 🚚 거래처 카드 생성 (입력칸 id 는 PC 화면과 동일 = DB 저장 키) ──
+        function buildCards() {
+            CLIENTS.forEach((client, ci) => {
+                const card = document.createElement("section");
+                card.className = "card";
+                card.id = `m_card_${ci}`;
+
+                const cells = productsOf(client)
+                    .map(
+                        (p) => `
+                    <label class="cell">
+                        <span class="lbl">${p.full}</span>
+                        <input type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" class="qty sync-item phase-1" id="c${ci}_${p.key}_order">
+                        <span class="sub" id="m_sub_${ci}_${p.key}"></span>
+                    </label>`,
+                    )
+                    .join("");
+
+                card.innerHTML = `
+                    <button type="button" class="card-head">
+                        <span class="name">${client.name}</span>
+                        <span class="dest">${client.dest}</span>
+                        <span class="prod" id="m_prod_${ci}"></span>
+                        <span class="sum" id="m_sum_${ci}"></span>
+                        <span class="chev">&#9662;</span>
+                    </button>
+                    <div class="summary"><div class="chips" id="m_chips_${ci}"></div><div class="remark-view" id="m_remark_${ci}"></div></div>
+                    <div class="card-body">
+                        <div class="grid">${cells}</div>
+                        <textarea class="remark sync-item" id="c${ci}_remark" placeholder="비고"></textarea>
+                    </div>`;
+                listEl.appendChild(card);
+            });
+        }
+
+        function adjustRemarkHeight(textarea) {
+            textarea.style.height = "auto";
+            textarea.style.height = textarea.scrollHeight + 2 + "px";
+        }
+
+        // ── 🧮 합계 · 요약 다시 그리기 ──
+        function recalcAll() {
+            let grandOrderTotal = 0;
+            const colOrderTotals = {};
+            PRODUCTS.forEach((p) => {
+                colOrderTotals[p.key] = 0;
+            });
+
+            CLIENTS.forEach((client, ci) => {
+                let rowOrderSum = 0,
+                    rowProdSum = 0;
+                const chips = document.getElementById(`m_chips_${ci}`);
+                chips.textContent = "";
+
+                productsOf(client).forEach((p) => {
+                    const oInput = document.getElementById(`c${ci}_${p.key}_order`);
+                    const pRaw = currentData[`c${ci}_${p.key}_prod`];
+                    const hasProd = pRaw !== null && pRaw !== undefined && String(pRaw).trim() !== "";
+                    const oVal = parseCommaNum(oInput.value);
+                    const pVal = hasProd ? parseCommaNum(pRaw) : 0;
+
+                    rowOrderSum += oVal;
+                    rowProdSum += pVal;
+                    colOrderTotals[p.key] += oVal;
+
+                    document.getElementById(`m_sub_${ci}_${p.key}`).textContent = hasProd
+                        ? `생산 ${formatNum(pVal)} · 미생산 ${formatNum(oVal - pVal)}`
+                        : "";
+
+                    if (oInput.value !== "") {
+                        const chip = document.createElement("span");
+                        chip.className = "chip";
+                        const name = document.createElement("span");
+                        name.textContent = p.full;
+                        const qty = document.createElement("b");
+                        qty.textContent = oInput.value;
+                        qty.className = PHASE_CLASSES.find((c) => oInput.classList.contains(c)) || "phase-1";
+                        chip.append(name, qty);
+                        chips.appendChild(chip);
+                    }
+                });
+
+                grandOrderTotal += rowOrderSum;
+
+                const remark = document.getElementById(`c${ci}_remark`);
+                document.getElementById(`m_remark_${ci}`).textContent = remark.value;
+                document.getElementById(`m_sum_${ci}`).textContent = rowOrderSum ? formatNum(rowOrderSum) : "";
+                document.getElementById(`m_prod_${ci}`).textContent = rowProdSum
+                    ? `미생산 ${formatNum(rowOrderSum - rowProdSum)}`
+                    : "";
+
+                const card = document.getElementById(`m_card_${ci}`);
+                card.classList.toggle("has-order", rowOrderSum > 0);
+                const isEmpty = rowOrderSum === 0 && remark.value.trim() === "";
+                card.classList.toggle("hidden", onlyOrdered && isEmpty && !card.contains(document.activeElement));
+            });
+
+            document.getElementById("grand_total").textContent = formatNum(grandOrderTotal);
+
+            const totalsBody = document.getElementById("totals-body");
+            totalsBody.textContent = "";
+            PRODUCTS.forEach((p) => {
+                if (!colOrderTotals[p.key]) return;
+                const row = document.createElement("div");
+                row.className = "row";
+                const name = document.createElement("span");
+                name.textContent = p.full;
+                const qty = document.createElement("b");
+                qty.textContent = formatNum(colOrderTotals[p.key]);
+                row.append(name, qty);
+                totalsBody.appendChild(row);
+            });
+            if (grandOrderTotal === 0) {
+                const empty = document.createElement("div");
+                empty.className = "empty";
+                empty.textContent = "입력된 주문이 없습니다";
+                totalsBody.appendChild(empty);
+            } else {
+                const row = document.createElement("div");
+                row.className = "row grand-row";
+                const name = document.createElement("span");
+                name.textContent = "합 계";
+                const qty = document.createElement("b");
+                qty.textContent = formatNum(grandOrderTotal);
+                row.append(name, qty);
+                totalsBody.appendChild(row);
+            }
+        }
+
+        // ── 🎨 주문 차수 제어 ──
+        function setOrderPhase(phase, saveToDb = true) {
+            currentGlobalPhase = phase;
+
+            document.querySelectorAll(".phase-btn").forEach((btn) => {
+                btn.classList.toggle("active", btn.dataset.phase === phase);
+            });
+            document.querySelectorAll(".qty").forEach((item) => {
+                if (item.value === "") setPhaseClass(item, phase);
+            });
+
+            if (saveToDb && currentRef) {
+                currentRef
+                    .child("order_phase")
+                    .set(phase)
+                    .catch((err) => {
+                        showToast("차수 변경 저장 실패: " + err.message);
+                    });
+            }
+        }
+
+        // ── 🛡️ Firebase 실시간 동기화 ──
+        function loadLogData(dateStr) {
+            if (currentRef) currentRef.off();
+            currentRef = db.ref("dryice_status/" + dateStr);
+
+            currentRef.on(
+                "value",
+                (snapshot) => {
+                    currentData = snapshot.val() || {};
+
+                    document.querySelectorAll(".sync-item").forEach((item) => {
+                        if (document.activeElement !== item) {
+                            const dbValue = currentData[item.id];
+                            item.value =
+                                dbValue === null || dbValue === undefined || dbValue === "null" ? "" : dbValue;
+                        }
+
+                        if (item.id.endsWith("_order")) {
+                            const savedCellPhase = currentData[item.id + "_phase"];
+                            setPhaseClass(item, item.value === "" ? currentGlobalPhase : savedCellPhase || "1");
+                        }
+                        if (item.id.endsWith("_remark")) {
+                            adjustRemarkHeight(item);
+                        }
+                    });
+
+                    setOrderPhase(currentData["order_phase"] || "1", false);
+                    recalcAll();
+                },
+                (error) => {
+                    showToast("데이터 불러오기 실패: " + error.message);
+                },
+            );
+        }
+
+        // ── 화면 구성 및 이벤트 연결 ──
+        buildCards();
+        changeDate(toDateStr(new Date()));
+        setOrderPhase("1", false);
+        recalcAll();
+
+        document.getElementById("btn-prev-date").addEventListener("click", () => shiftDate(-1));
+        document.getElementById("btn-next-date").addEventListener("click", () => shiftDate(1));
+        document.getElementById("btn-today").addEventListener("click", () => changeDate(toDateStr(new Date())));
+        dateInput.addEventListener("change", (e) => changeDate(e.target.value));
+
+        document.querySelectorAll(".phase-btn").forEach((btn) => {
+            btn.addEventListener("click", () => setOrderPhase(btn.dataset.phase));
+        });
+
+        document.getElementById("btn-filter").addEventListener("click", (e) => {
+            onlyOrdered = !onlyOrdered;
+            e.currentTarget.classList.toggle("active", onlyOrdered);
+            recalcAll();
+        });
+
+        // 거래처 카드 접기/펼치기
+        listEl.addEventListener("click", (e) => {
+            const head = e.target.closest(".card-head");
+            if (!head) return;
+            const card = head.parentElement;
+            card.classList.toggle("open");
+            if (card.classList.contains("open")) {
+                adjustRemarkHeight(card.querySelector(".remark"));
+            }
+        });
+
+        // 입력 즉시 저장 (PC 화면과 같은 키 · 같은 형식)
+        listEl.addEventListener("input", (e) => {
+            const target = e.target;
+            if (!target.classList.contains("sync-item")) return;
+
+            const updates = {};
+            if (target.id.endsWith("_order")) {
+                const val = target.value.replace(/[^0-9]/g, "");
+                target.value = val === "" ? "" : parseInt(val, 10).toLocaleString("ko-KR");
+                setPhaseClass(target, currentGlobalPhase);
+                updates[target.id + "_phase"] = target.value === "" ? null : currentGlobalPhase;
+            } else {
+                adjustRemarkHeight(target);
+            }
+            updates[target.id] = target.value;
+            recalcAll();
+
+            if (!currentRef) {
+                showToast("아직 서버에 연결되지 않았습니다. 잠시 후 다시 입력해 주세요.");
+                return;
+            }
+            currentRef.update(updates).catch(() => {
+                showToast("데이터 저장 실패! 인터넷 연결을 확인하세요.");
+            });
+        });
+
+        // 수량 칸을 누르면 기존 값 전체 선택 → 바로 덮어쓰기
+        listEl.addEventListener("focusin", (e) => {
+            if (e.target.classList.contains("qty")) {
+                const el = e.target;
+                setTimeout(() => el.select(), 0);
+            }
+        });
+        listEl.addEventListener("focusout", () => {
+            if (onlyOrdered) setTimeout(recalcAll, 0);
+        });
+
+        // 키패드의 [다음] 키 → 같은 거래처의 다음 품목으로 이동
+        listEl.addEventListener("keydown", (e) => {
+            if (e.key !== "Enter" || !e.target.classList.contains("qty")) return;
+            e.preventDefault();
+            const inputs = Array.from(e.target.closest(".card").querySelectorAll(".qty"));
+            const next = inputs[inputs.indexOf(e.target) + 1];
+            if (next) next.focus();
+            else e.target.blur();
+        });
+
+        // 🌐 연결 상태 표시등
+        db.ref(".info/connected").on("value", (snap) => {
+            const dot = document.getElementById("conn-dot");
+            dot.classList.toggle("on", snap.val() === true);
+            dot.classList.toggle("off", snap.val() !== true);
+        });
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                loadLogData(dateInput.value);
+            } else {
+                window.location.replace("login.html");
+            }
+        });
+    </script>
+</body>
+</html>

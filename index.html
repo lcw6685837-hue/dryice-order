@@ -9,6 +9,13 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
+    <!-- 📱 휴대폰 접속 시 전용 화면으로 자동 이동 (주소 끝에 ?pc=1 을 붙이면 PC 화면 유지) -->
+    <script>
+        if (/Android.+Mobile|iPhone|iPod/i.test(navigator.userAgent) && !/[?&]pc=1/.test(location.search)) {
+            location.replace("mobile.html");
+        }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -229,6 +236,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=31"></script>
+    <script src="data.js?v=32"></script>
+    <script src="script.js?v=32"></script>
 </body>
 </html>
