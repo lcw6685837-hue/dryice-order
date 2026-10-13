@@ -951,6 +951,11 @@ document.addEventListener("DOMContentLoaded", () => {
         syncItems.forEach((item) => {
           item.addEventListener("input", (e) => {
             if (currentRef) {
+              // 이 PC에서 직접 입력한 주문은 변동으로 감지되지 않도록 미리 기록 (본인 입력 시 알림 팝업 방지)
+              if (e.target.id.endsWith("_order")) {
+                previousOrders[e.target.id] = e.target.value;
+              }
+
               currentRef
                 .child(e.target.id)
                 .set(e.target.value)
